@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <solution>
+    <Description>Гринхаус</Description>
+    <ApplicationDirectory>GreenHouse</ApplicationDirectory>
+  </solution>
+  <solution>
+    <Description>Тест платформы</Description>
+    <ApplicationDirectory>PlatformTest</ApplicationDirectory>
+  </solution>
+</root>
