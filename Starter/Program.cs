@@ -18,7 +18,8 @@ namespace Starter
             {
             Exit,
             Update,
-            Error
+            Error,
+            Restart
             }
 
         /// <summary>
@@ -32,18 +33,18 @@ namespace Starter
             do
                 {
                 loaderResult = RunLoader();
-                } while ( loaderResult == LoaderResult.Update );
+                } while ( loaderResult == LoaderResult.Update || loaderResult == LoaderResult.Restart);
             }
 
         private static LoaderResult RunLoader()
             {
-            AppDomain loaderDomain = AppDomain.CreateDomain("LoaderDomain", null, new AppDomainSetup { ApplicationBase = Environment.CurrentDirectory });
+            AppDomain loaderDomain = AppDomain.CreateDomain("LoaderDomain", null, new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(LOADER_PATH) });
             loaderDomain.ExecuteAssembly(LOADER_PATH, Args);               
 
             object resultObj = loaderDomain.GetData("Result");
             LoaderResult result = LoaderResult.Error;
 
-            if ( resultObj == null || TryResultConvert(resultObj, out result) )
+            if ( resultObj == null || !TryResultConvert(resultObj, out result) )
                 {
                 LogError("Wrong loader result");
                 AppDomain.Unload(loaderDomain);
@@ -56,12 +57,12 @@ namespace Starter
                     case LoaderResult.Update:
                         object updateLoaderFilesInfoObj = loaderDomain.GetData("UpdateLoaderFilesInfo");
                         AppDomain.Unload(loaderDomain);
-                        if ( updateLoaderFilesInfoObj == null || !( updateLoaderFilesInfoObj is SortedDictionary<string, string> ) )
+                        if ( updateLoaderFilesInfoObj == null || !( updateLoaderFilesInfoObj is Dictionary<string, string> ) )
                             {
                             LogError("Wrong loader update info");
                             return LoaderResult.Error;
                             }
-                        SortedDictionary<string, string> updateLoaderFilesInfo = updateLoaderFilesInfoObj as SortedDictionary<string, string>;
+                        Dictionary<string, string> updateLoaderFilesInfo = updateLoaderFilesInfoObj as Dictionary<string, string>;
                         UpdateFiles(updateLoaderFilesInfo);
                         break;
 
@@ -82,15 +83,15 @@ namespace Starter
                 }
             }
 
-        private static void UpdateFiles( SortedDictionary<string, string> updateLoaderFilesInfo )
+        private static void UpdateFiles( Dictionary<string, string> updateLoaderFilesInfo )
             {
             foreach ( KeyValuePair<string, string> pair in updateLoaderFilesInfo )
                 {
-                if ( pair.Value == null )
+                if ( pair.Value == null && File.Exists(pair.Key) )
                     {
                     File.Delete(pair.Key);
                     }
-                else
+                else if ( File.Exists(pair.Key) )
                     {
                     File.Move(pair.Key, pair.Value);
                     }

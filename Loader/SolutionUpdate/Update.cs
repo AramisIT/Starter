@@ -279,7 +279,10 @@ namespace Aramis.Loader.SolutionUpdate
         /// </summary>
         public static void ApplyUpdate()
             {
-
+            AppDomain copierDomain = AppDomain.CreateDomain("CopierDomain");
+            copierDomain.SetData("Path", UpdateInfoPath);
+            copierDomain.ExecuteAssembly(@"w:\Work\Temp Dreamering\C# projects\Starter\Copier\bin\Release\Copier.exe");
+            AppDomain.Unload(copierDomain);
             //if ( File.Exists(UpdateInfoPath) )
             //    {
             //    string[] result = File.ReadAllLines(UpdateInfoPath);
@@ -287,14 +290,11 @@ namespace Aramis.Loader.SolutionUpdate
             //        {
             //        try
             //            {
-            //            string[] filepaths = result[i].Split('|');
-            //            if ( File.Exists(filepaths[1]) )
-            //                {
-            //                File.Delete(filepaths[1]);
-            //                }
+            //            string[] filepaths = result[i].Split('|');                        
             //            if ( File.Exists(filepaths[0]) )
             //                {
-            //                File.Move(filepaths[0], filepaths[1]);
+            //                File.Copy(filepaths[0], filepaths[1], true);
+            //                File.Delete(filepaths[0]);
             //                }
             //            }
             //        catch ( Exception exp )
@@ -305,7 +305,7 @@ namespace Aramis.Loader.SolutionUpdate
             //        }
             //    File.Delete(UpdateInfoPath);
             //    }
-            SetUpdateNumber();
+            //SetUpdateNumber();
 
             }
 

@@ -45,15 +45,15 @@ namespace Aramis.Loader
             RunResult runResult;
             do
                 {
-
                 StartSolutionUpdateChecking();
 
                 runResult = StartSolution();
 
                 StopSolutionUpdateChecking();
-
+                //Thread.Sleep(10000);
                 AcceptSolutionUpdates();
                 } while ( runResult == RunResult.Update || runResult == RunResult.Restart );
+            //Program.ExitWithResult(LoaderResult.Restart);
             }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Aramis.Loader
             {
             // подождать пока можно будет войти в систему, здесь показать окно загрузки системы
             i++;
-            
+
             solutionDomain = AppDomain.CreateDomain("SolutionDomain" + i.ToString(), null, new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(Program.SolutionPath),
@@ -162,7 +162,7 @@ namespace Aramis.Loader
                 // Удаляем все файлы обновления, которые были загружены ранее, но по каким-либо причинам небыли применены
                 Update.DeleteAllPreviousUpdate();
                 // Загружаем обновления
-                Update.Download();                
+                Update.Download();
                 // Проставляем в домен приложения флаг о наличии обновлений
                 if ( solutionDomain != null )
                     {
