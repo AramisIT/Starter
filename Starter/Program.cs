@@ -6,7 +6,7 @@ namespace Starter
     {
     static class Program
         {
-        const string LOADER_PATH = @"w:\Work\Temp Dreamering\C# projects\Starter\Loader\bin\Release\Loader.exe";
+        const string LOADER_PATH = @"X:\My work\Projects\UTK\SOFTWARE\Starter\Loader\bin\Release\Loader.exe";
 
         private static string[] Args
             {

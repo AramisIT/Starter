@@ -23,7 +23,8 @@ namespace Aramis.Loader
             {
             get
                 {
-                return Program.SolutionPath + Program.SolutionEXEFileName;
+                return @"C:\Documents and Settings\D\Application Data\Aramis .NET\GreenHouse\GreenHouse.exe";
+                    //@"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";//Program.SolutionPath + Program.SolutionEXEFileName;
                 }
             }
         private const int UPDATES_CHECKING_INTERVAL = 5000;
