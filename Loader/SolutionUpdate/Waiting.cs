@@ -43,7 +43,7 @@ namespace Aramis.Loader.SolutionUpdate
                             } 
                         }
                     }
-                catch 
+                catch (Exception exp)
                     {
                     "Ошибка соединения с базой данных.\r\nПроверьте подключение к сети.".Error();
                     return false;

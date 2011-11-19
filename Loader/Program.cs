@@ -26,7 +26,8 @@ namespace Aramis.Loader
         /// <summary>
         /// Возвращает код ошибки
         /// </summary>
-        Error
+        Error,
+        Restart
         }
 
     /// <summary>
@@ -178,7 +179,7 @@ namespace Aramis.Loader
 
         private static bool LoaderUpdatesExists()
             {
-            SortedDictionary<string, string> updateLoaderFilesInfo = CheckLoaderFiles();
+            Dictionary<string, string> updateLoaderFilesInfo = CheckLoaderFiles();
             if ( updateLoaderFilesInfo.Count == 0 )
                 {
                 return false;
@@ -190,14 +191,15 @@ namespace Aramis.Loader
             //updateLoaderFilesInfo.Add(@"bin\file 2.dll", null); // удалить "file 2.dll" из подкаталога папки "bin"
             //updateLoaderFilesInfo.Add(@"assembly\file 3.dll", "4323-42342-342-34234-324"); // переименовать ранее загруженный файл "4323-42342-342-34234-324" в файл "file 3.dll" в папке assembly
             AppDomain.CurrentDomain.SetData("UpdateLoaderFilesInfo", updateLoaderFilesInfo);
-            AppDomain.CurrentDomain.SetData("Result", 2);
+            AppDomain.CurrentDomain.SetData("Result", 1);
             return true;
             }
 
-        private static SortedDictionary<string, string> CheckLoaderFiles()
+        private static Dictionary<string, string> CheckLoaderFiles()
             {
-            SortedDictionary<string, string> resultDict = new SortedDictionary<string, string>();
+            Dictionary<string, string> resultDict = new Dictionary<string, string>();
             List<string> filesHash = new List<string>();
+            string localPath = AppDomain.CurrentDomain.BaseDirectory + "\\";
             using ( SqlConnection connection = new SqlConnection(Settings.Default.ConnectionString) )
                 {
                 try
@@ -205,11 +207,11 @@ namespace Aramis.Loader
                     connection.Open();
                     using ( SqlCommand command = connection.CreateCommand() )
                         {
-                        command.CommandText = "select HashCode from Loader";
+                        command.CommandText = "select HashCode, FileName from Loader";
                         SqlDataReader result = command.ExecuteReader();
                         while ( result.Read() )
                             {
-                            if ( ( string ) result[0] != HashGenerator.GetFileHash(Application.StartupPath + "\\Loader.dll", HashGenerator.HashType.SHA512) )
+                            if ( ( string ) result[0] != HashGenerator.GetFileHash(localPath + ( string ) result[1], HashGenerator.HashType.SHA512) )
                                 {
                                 filesHash.Add(( string ) result[0]);
                                 }
@@ -226,14 +228,14 @@ namespace Aramis.Loader
                                 {
                                 Reader.Read();
                                 buffer = Reader.GetSqlBinary(0).Value;
-                                string fileName = String.Format("{0}\\{1}", Application.StartupPath, Reader.GetSqlString(1).Value);
-                                string loadedFileName = String.Format("{0}\\{1}", Application.StartupPath, hash);
+                                string fileName = String.Format("{0}{1}", localPath, Reader.GetSqlString(1).Value);
+                                string loadedFileName = String.Format("{0}{1}", localPath, hash);
                                 Reader.Close();
                                 FileStream dest = File.Create(loadedFileName);
                                 dest.Write(buffer, 0, buffer.Length);
                                 dest.Close();
                                 resultDict.Add(fileName, null);
-                                resultDict.Add(loadedFileName, fileName);
+                                resultDict.Add(loadedFileName, fileName);                                                                
                                 }
                             }
                         }
