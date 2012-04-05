@@ -57,7 +57,7 @@ namespace Aramis.Loader
                 if ( Program.SolutionName == null )
                     {
                     LoadSolutionsList();
-                    skipSolutionСhouse = false;
+                    //skipSolutionСhouse = false;
                     }
 
                 if ( !error )
@@ -99,6 +99,7 @@ namespace Aramis.Loader
                     break;
                 case 1:
                     // Если в списке содержится всего одно решение - нет смысла отображать форму выбора решений. Пропускаем ее.
+                    SolutionsListControl.Items.Add(solutionsList[0]);
                     SolutionsListControl.SelectedIndex = 0;
                     SetSolutionName();
                     skipSolutionСhouse = true;
@@ -173,15 +174,14 @@ namespace Aramis.Loader
                 {
                 // Инвокаем форму и меняем страницу интерфейса
                 Invoke(new VoidDelegate(WaitingWhileDBUpdating));
-
-                // Подписываемся на событие окончания ожидания(по окончанию ожидания мы должны запустить решение)
-                Waiting.OnWaitingEnd += Waiting_OnWaitingEnd;
-                // Запускаем ожидание
-                Waiting.Wait(WaitingCodes.UPDATING_DB_STRUCTURE_CODE);
                 }
             else
                 {
                 tabControl1.SelectedTab = WaitingWhileUpdatePage;
+                // Подписываемся на событие окончания ожидания(по окончанию ожидания мы должны запустить решение)
+                Waiting.OnWaitingEnd += Waiting_OnWaitingEnd;
+                // Запускаем ожидание
+                Waiting.Wait(WaitingCodes.UPDATING_DB_STRUCTURE_CODE);
                 }
             }
 

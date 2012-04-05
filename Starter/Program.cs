@@ -33,7 +33,7 @@ namespace Starter
             do
                 {
                 loaderResult = RunLoader();
-                } while ( loaderResult == LoaderResult.Update || loaderResult == LoaderResult.Restart);
+                } while ( loaderResult == LoaderResult.Update );
             }
 
         private static LoaderResult RunLoader()

@@ -26,8 +26,7 @@ namespace Aramis.Loader.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=AramisUpdate;Persist Security Info=True;Use" +
-            "r ID=sa;Password=123")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=AramisUpdate;User ID=sa;Password=123")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));

@@ -45,7 +45,7 @@ namespace Aramis.Loader.SolutionUpdate
                     }
                 catch (Exception exp)
                     {
-                    "Ошибка соединения с базой данных.\r\nПроверьте подключение к сети.".Error();
+                    ("Ошибка соединения с базой данных.\r\nПроверьте подключение к сети.\r\n"+(exp.Message)).Error();
                     return false;
                     }
                 }

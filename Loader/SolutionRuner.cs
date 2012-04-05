@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Aramis.Loader.SolutionUpdate;
 using System.IO;
+using System.Diagnostics;
 
 namespace Aramis.Loader
     {
@@ -23,8 +24,9 @@ namespace Aramis.Loader
             {
             get
                 {
-                return @"C:\Documents and Settings\D\Application Data\Aramis .NET\GreenHouse\GreenHouse.exe";
-                    //@"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";//Program.SolutionPath + Program.SolutionEXEFileName;
+                return //@"C:\Documents and Settings\D\Application Data\Aramis .NET\GreenHouse\GreenHouse.exe";
+                //@"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";//Program.SolutionPath + Program.SolutionEXEFileName;
+                @"X:\My work\Projects\UTK\SOFTWARE\GreenHouse\GreenHouse\bin\Release\GreenHouse.exe"; ;
                 }
             }
         private const int UPDATES_CHECKING_INTERVAL = 5000;
@@ -44,16 +46,18 @@ namespace Aramis.Loader
         public static void Start()
             {
             RunResult runResult;
+            int okQuantity = 0;
             do
                 {
-                StartSolutionUpdateChecking();
+                //StartSolutionUpdateChecking();
 
                 runResult = StartSolution();
-
-                StopSolutionUpdateChecking();
+                okQuantity++;
+                Trace.WriteLine(string.Format("Количество успешных запусков - {0}", okQuantity));
+                //StopSolutionUpdateChecking();
                 //Thread.Sleep(10000);
-                AcceptSolutionUpdates();
-                } while ( runResult == RunResult.Update || runResult == RunResult.Restart );
+                //AcceptSolutionUpdates();
+                } while ( true );//runResult == RunResult.Update || runResult == RunResult.Restart );
             //Program.ExitWithResult(LoaderResult.Restart);
             }
 
@@ -100,9 +104,17 @@ namespace Aramis.Loader
             solutionDomain.ExecuteAssembly(SOLUTION_PATH);
 
             object startResult = solutionDomain.GetData("Result");
-
-            AppDomain.Unload(solutionDomain);
-
+            try
+                {
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                AppDomain.Unload(solutionDomain);
+                }
+            catch (Exception exp)
+                {
+                Trace.WriteLine(string.Format("Ошибка выгрузки домена: {0}", exp.Message));
+                }
             solutionDomain = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
