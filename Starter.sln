@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copier", "Copier\Copier.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aramis.NET", "Aramis.NET\Aramis.NET.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlassWindow", "..\..\..\..\..\SOFTWARE\Starter\GlassWindow\GlassWindow\GlassWindow.csproj", "{96BCD0B1-E128-4068-8FD9-41EF24909B01}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisStarter", "AramisStarter\AramisStarter.csproj", "{CE5A42C7-0052-42E3-8C73-0C710412925C}"
 EndProject
 Global
@@ -31,16 +29,6 @@ Global
 		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|Mixed Platforms.Build.0 = Release|x86
 		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|x86.ActiveCfg = Release|x86
 		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|x86.Build.0 = Release|x86
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{96BCD0B1-E128-4068-8FD9-41EF24909B01}.Release|x86.ActiveCfg = Release|Any CPU
 		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Mixed Platforms.Build.0 = Debug|x86

@@ -27,11 +27,12 @@ namespace Aramis.NET
             }
 
         private const string DATABASE_NAME = "AramisITApplication";
-        private const string DATABASE_LOGIN = "GetStarter";
+        private const string DATABASE_LOGIN = "AramisUpdateFilesGetter";
         private const string DATABASE_PASSWORD = "vjhrjdysqcjrjcnsdftn";
         private static readonly string CONNECTION_STRING = GetConnectionString();
         private const string STARTER_NAME = "AramisStarter.dll";
         private static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+        private static readonly string SOLUTIONS_PATH = STARTER_PATH + @"\Solutions.xml";
         private static readonly string FULL_STARTER_NAME = GetFullStarterPath();
 
         private static string GetFullStarterPath()
@@ -60,7 +61,7 @@ namespace Aramis.NET
 
         private static string GetDataSource()
             {
-            return ConfigurationManager.AppSettings[ "DataBaseComputer" ] ?? "";
+            return ConfigurationManager.AppSettings[ "DataBaseComputer" ] ?? "localhost";
             }
 
         #endregion
@@ -83,7 +84,7 @@ namespace Aramis.NET
                 }
 
             IStarter starter = GetStarter();
-
+            
             ExitMutex( starterRuningMutex );
 
             if ( starter != null )
@@ -130,7 +131,7 @@ namespace Aramis.NET
             else
                 {
                 Type starterType = matchedTypes[ 0 ];
-                object starterObj = Activator.CreateInstance( starterType );
+                object starterObj = Activator.CreateInstance( starterType, new object[] { SOLUTIONS_PATH } );
                 return starterObj as IStarter;
                 }
             }

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GlassWindow.Properties
+namespace WindowsFormsApplication2.Properties
     {
 
 

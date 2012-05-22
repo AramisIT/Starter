@@ -7,7 +7,7 @@ using ConnectionGetterInterface;
 
 namespace WpfApplication1
     {
-    class Connection40 : IConnectionGetter
+    class Connection40: IConnectionGetter
         {
         public System.Data.SqlClient.SqlConnection ConnectionToSQL
             {
