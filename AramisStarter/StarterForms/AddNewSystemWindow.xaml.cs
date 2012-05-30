@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AramisStarter.Utils;
 using Windows;
 
 namespace AramisStarter
@@ -39,6 +40,11 @@ namespace AramisStarter
 
         private void Button_Click_1( object sender, RoutedEventArgs e )
             {
+            AddCurrentSolution();
+            }
+
+        private void AddCurrentSolution()
+            {
             if ( databaseNameComboBox.SelectedItem == null )
                 {
                 return;
@@ -46,15 +52,38 @@ namespace AramisStarter
 
             ComboBoxItem comboBoxItem = databaseNameComboBox.SelectedItem as ComboBoxItem;
             string databaseName = comboBoxItem.Content as string;
-            NewSolution = new SolutionInfo() { SqlServerName = serverNameTextBox.Text.Trim(), SolutionName = databaseName, SolutionFriendlyName = GetFriendlyName( databaseName ) };
+            NewSolution = new SolutionInfo()
+                {
+                    SqlServerName = serverNameTextBox.Text.Trim(),
+                    SqlBaseName = databaseName
+                };
+            SetSystemName( NewSolution );
             Close();
             }
 
-        private string GetFriendlyName( string databaseName )
+        private void SetSystemName( SolutionInfo solution )
+            {
+            string systemNameInfo = GetSystemNameInfo( solution.SqlBaseName );
+
+            int separatorIndex = systemNameInfo.IndexOf( ';' );
+
+            if ( separatorIndex <= 0 )
+                {
+                solution.SolutionName = solution.SqlBaseName;
+                solution.SolutionFriendlyName = solution.SqlBaseName;
+                }
+            else
+                {
+                solution.SolutionName = systemNameInfo.Substring( 0, separatorIndex );
+                solution.SolutionFriendlyName = systemNameInfo.Substring( separatorIndex + 1, systemNameInfo.Length - ( separatorIndex + 1 ) );
+                }
+            }
+
+        private string GetSystemNameInfo( string databaseName )
             {
             try
                 {
-                using ( SqlConnection conn = new SqlConnection( DBChecker.GetConnectionString( serverNameTextBox.Text.Trim(), databaseName, "GetUsersDescriptions" ) ) )
+                using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverNameTextBox.Text.Trim(), databaseName, "GetUsersDescriptions" ) ) )
                     {
                     conn.Open();
                     using ( SqlCommand cmd = new SqlCommand( "select dbo.GetAramisSystemName()", conn ) )
@@ -79,7 +108,7 @@ namespace AramisStarter
             {
             databaseNameComboBox.Items.Clear();
 
-            using ( SqlConnection conn = new SqlConnection( DBChecker.GetConnectionString( serverNameTextBox.Text.Trim() ) ) )
+            using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverNameTextBox.Text.Trim() ) ) )
                 {
                 try
                     {
@@ -136,6 +165,26 @@ namespace AramisStarter
             {
             get;
             private set;
+            }
+
+        private void databaseNameComboBox_KeyDown( object sender, KeyEventArgs e )
+            {
+            if ( e.Key == Key.Enter )
+                {
+                AddCurrentSolution();
+                }
+            }
+
+        private void serverNameTextBox_TextChanged( object sender, TextChangedEventArgs e )
+            {
+            HideError();
+            }
+
+        private void HideError()
+            {
+            goButton.Visibility = System.Windows.Visibility.Visible;
+            myMessage.Visibility = Visibility.Hidden;
+            myMessage.Text = "";
             }
         }
     }

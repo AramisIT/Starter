@@ -1,11 +1,11 @@
 ﻿<Window x:Class="AramisStarter.Splash"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-         Height="379" Width="606"  ResizeMode="NoResize" Background="#0000"  WindowStartupLocation="CenterScreen"  WindowStyle="None" AllowsTransparency="True" ShowInTaskbar="False"  >
+         Height="378" Width="602"  ResizeMode="NoResize" Background="#0000"  WindowStartupLocation="CenterScreen"  WindowStyle="None" AllowsTransparency="True" ShowInTaskbar="False"  >
     <Canvas Loaded="Grid_Loaded_1">
         <Image x:Name="logoImage" Loaded="logoImage_Loaded"></Image>
-       <Rectangle Fill="#FCCC" Width="129" Height="11" Canvas.Left="477" Canvas.Top="365" x:Name="progressRect" ></Rectangle>
-        <ProgressBar Height="11" Canvas.Top="365" Width="129" Value="50" Background="{x:Null}" BorderThickness="0" Canvas.Left="477" RenderTransformOrigin="1.596,-1.826" Foreground="#FF3E14FD" x:Name="loadingProgress">
+        <Rectangle Fill="#FFFF" Width="604" Height="148" Canvas.Left="0" Canvas.Top="134" x:Name="progressRect" Panel.ZIndex="-1000"></Rectangle>
+        <ProgressBar Panel.ZIndex="-100" Height="148" Canvas.Top="134" Canvas.Left="-1" Width="602" Value="50" Background="{x:Null}" BorderThickness="0" RenderTransformOrigin="1.596,-1.826"  x:Name="loadingProgress" Maximum="1000">
             <ProgressBar.BorderBrush>
                 <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                     <GradientStop Color="#FFB2B2B2" Offset="0"/>
@@ -13,6 +13,9 @@
                 </LinearGradientBrush>
             </ProgressBar.BorderBrush>
         </ProgressBar>
+        <Button Content="Start solution" Height="25" Canvas.Left="26" Canvas.Top="10" Width="114" Click="Button_Click_2" Visibility="Hidden"/>
+        <Button Content="Reset Version" Height="25" Canvas.Left="163" Canvas.Top="10" Width="114" Click="Button_Click_1"  Visibility="Hidden"/>
+        <Button Content="Exit" Height="25" Canvas.Left="302" Canvas.Top="10" Width="114" Click="Button_Click_3"  Visibility="Hidden"/>
 
 
     </Canvas>

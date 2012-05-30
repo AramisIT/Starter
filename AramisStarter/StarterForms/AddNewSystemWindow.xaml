@@ -37,8 +37,7 @@
                 <GradientStop Offset="0.8" Color="#6000"></GradientStop>
             </LinearGradientBrush>
         </Grid.Background>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="0"></RowDefinition>
+        <Grid.RowDefinitions>            
             <RowDefinition Height="55"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -49,12 +48,12 @@
             <ColumnDefinition Width="250"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         
-        <TextBlock Grid.Row="1" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Сервер</TextBlock>
-        <TextBlock Grid.Row="2" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Имя базы</TextBlock>
+        <TextBlock Grid.Row="0" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Сервер</TextBlock>
+        <TextBlock Grid.Row="1" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Имя базы</TextBlock>
 
-        <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="serverNameTextBox" LostFocus="serverNameTextBox_LostFocus" KeyDown="serverNameTextBox_KeyDown" ></TextBox>
+        <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="serverNameTextBox" LostFocus="serverNameTextBox_LostFocus" KeyDown="serverNameTextBox_KeyDown" TextChanged="serverNameTextBox_TextChanged" ></TextBox>
        
-        <ComboBox FontSize="12" Grid.Row="2" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="databaseNameComboBox">
+        <ComboBox FontSize="12" Grid.Row="1" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="databaseNameComboBox" KeyDown="databaseNameComboBox_KeyDown">
             <ComboBox.Resources>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="FontSize" Value="16"/>
@@ -64,8 +63,8 @@
             <ComboBoxItem Content="Горовая Ярослава"/>
         </ComboBox>  
         
-        <Button Grid.ColumnSpan="2" Grid.Row="4" MaxHeight="25" MaxWidth="200"  FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Click="Button_Click_1" Margin="0,0,0,0" x:Name="goButton">OK</Button>
-        <TextBlock  Visibility="Hidden" Grid.ColumnSpan="2" Grid.Row="4" x:Name="myMessage" MinHeight="0" Text="База не найдена" TextWrapping="Wrap" TextAlignment="Center" >
+        <Button Grid.ColumnSpan="2" Grid.Row="3" MaxHeight="25" MaxWidth="200"  FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Click="Button_Click_1" Margin="0,0,0,0" x:Name="goButton">OK</Button>
+        <TextBlock  Visibility="Hidden" Grid.ColumnSpan="2" Grid.Row="3" x:Name="myMessage" MinHeight="0" Text="База не найдена" TextWrapping="Wrap" TextAlignment="Center" >
         	<TextBlock.Foreground>
         		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
         			<GradientStop Color="#FFF0BFBF" Offset="0.004"/>

@@ -6,6 +6,7 @@ using System.Threading;
 using Aramis.Loader.SolutionUpdate;
 using System.IO;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace Aramis.Loader
     {
@@ -25,8 +26,10 @@ namespace Aramis.Loader
             get
                 {
                 return //@"C:\Documents and Settings\D\Application Data\Aramis .NET\GreenHouse\GreenHouse.exe";
-                //@"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";//Program.SolutionPath + Program.SolutionEXEFileName;
-                @"X:\My work\Projects\UTK\SOFTWARE\GreenHouse\GreenHouse\bin\Release\GreenHouse.exe"; ;
+                    //@"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";//Program.SolutionPath + Program.SolutionEXEFileName;
+                    @"X:\My work\Projects\UTK\SOFTWARE\GreenHouse\GreenHouse\bin\Release\GreenHouse.exe"; 
+                 //    @"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";
+                //@"C:\Users\D\Desktop\ThreadsTesting\ThreadsTesting\bin\Debug\ThreadsTesting.exe";
                 }
             }
         private const int UPDATES_CHECKING_INTERVAL = 5000;
@@ -53,7 +56,7 @@ namespace Aramis.Loader
 
                 runResult = StartSolution();
                 okQuantity++;
-                Trace.WriteLine(string.Format("Количество успешных запусков - {0}", okQuantity));
+                Trace.WriteLine( string.Format( "Количество успешных запусков - {0}", okQuantity ) );
                 //StopSolutionUpdateChecking();
                 //Thread.Sleep(10000);
                 //AcceptSolutionUpdates();
@@ -66,14 +69,14 @@ namespace Aramis.Loader
         /// </summary>
         private static void StartSolutionUpdateChecking()
             {
-            updatesCheckingThread = new Thread(() =>
+            updatesCheckingThread = new Thread( () =>
             {
                 while ( true )
                     {
                     CheckSolutionUpdates();
-                    Thread.Sleep(UPDATES_CHECKING_INTERVAL);
+                    Thread.Sleep( UPDATES_CHECKING_INTERVAL );
                     }
-            });
+            } );
 
             updatesCheckingThread.IsBackground = true;
             updatesCheckingThread.Start();
@@ -96,24 +99,33 @@ namespace Aramis.Loader
             // подождать пока можно будет войти в систему, здесь показать окно загрузки системы
             i++;
 
-            solutionDomain = AppDomain.CreateDomain("SolutionDomain" + i.ToString(), null, new AppDomainSetup
-            {
-                ApplicationBase = Path.GetDirectoryName(Program.SolutionPath),
-                ConfigurationFile = SOLUTION_PATH + ".config"
-            });
-            solutionDomain.ExecuteAssembly(SOLUTION_PATH);
+            solutionDomain = AppDomain.CreateDomain( "SolutionDomain" + i.ToString(), null, new AppDomainSetup
+                {
+                    ApplicationBase = Path.GetDirectoryName( SOLUTION_PATH),//Program.SolutionPath ),
+                    ConfigurationFile = SOLUTION_PATH + ".config"
+                } );
 
-            object startResult = solutionDomain.GetData("Result");
+            //  solutionDomain.DomainUnload += solutionDomain_DomainUnload;
+            MessageBox.Show( "Готов к запуску" );
+            solutionDomain.ExecuteAssembly( SOLUTION_PATH );
+
+            while ( solutionDomain.GetData( "ExitStatus" ) == null )
+                {
+                Thread.Sleep( 500 );
+                }
+
+            object startResult = solutionDomain.GetData( "Result" );
             try
                 {
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
-                AppDomain.Unload(solutionDomain);
+
+                AppDomain.Unload( solutionDomain );
                 }
-            catch (Exception exp)
+            catch ( Exception exp )
                 {
-                Trace.WriteLine(string.Format("Ошибка выгрузки домена: {0}", exp.Message));
+                Trace.WriteLine( string.Format( "Ошибка выгрузки домена: {0}", exp.Message ) );
                 }
             solutionDomain = null;
             GC.Collect();
@@ -122,14 +134,24 @@ namespace Aramis.Loader
             RunResult result;
             if ( startResult != null )
                 {
-                TryResultConvert(startResult, out result);
+                TryResultConvert( startResult, out result );
                 }
             else
                 {
                 result = RunResult.Error;
                 }
-
+            MessageBox.Show("Работа завершена");
             return result;
+            }
+
+        static void solutionDomain_DomainUnload( object sender, EventArgs e )
+            {
+            string trace = e.ToString();
+            }
+
+        static void solutionDomain_UnhandledException( object sender, UnhandledExceptionEventArgs e )
+            {
+            Trace.WriteLine( "solutionDomain_UnhandledException: " + e.ExceptionObject.ToString() );
             }
 
         /// <summary>
@@ -156,7 +178,7 @@ namespace Aramis.Loader
             {
             error = false;
             // Ждем окончания загрузки файлов в БД
-            if ( !Waiting.Wait(WaitingCodes.DOWNLOADING_FILES_DB_CODE) )
+            if ( !Waiting.Wait( WaitingCodes.DOWNLOADING_FILES_DB_CODE ) )
                 {
                 // В процессе проверки возникла ошибка. Продолжать обновление нельзя
                 error = true;
@@ -170,7 +192,7 @@ namespace Aramis.Loader
                 {
                 if ( solutionDomain != null )
                     {
-                    solutionDomain.SetData("UpdatesExists", false);
+                    solutionDomain.SetData( "UpdatesExists", false );
                     }
                 // Удаляем все файлы обновления, которые были загружены ранее, но по каким-либо причинам небыли применены
                 Update.DeleteAllPreviousUpdate();
@@ -179,13 +201,13 @@ namespace Aramis.Loader
                 // Проставляем в домен приложения флаг о наличии обновлений
                 if ( solutionDomain != null )
                     {
-                    solutionDomain.SetData("UpdatesExists", true);
-                    solutionDomain.SetData("AvailableUpdateNumber", Update.UpdateNumber);
+                    solutionDomain.SetData( "UpdatesExists", true );
+                    solutionDomain.SetData( "AvailableUpdateNumber", Update.UpdateNumber );
                     }
                 }
             }
 
-        private static bool TryResultConvert(object resultObj, out RunResult result)
+        private static bool TryResultConvert( object resultObj, out RunResult result )
             {
             result = RunResult.Error;
             if ( !( resultObj is Int32 ) )
@@ -193,13 +215,13 @@ namespace Aramis.Loader
                 return false;
                 }
 
-            int resultInt = ( int ) resultObj;
-            if ( resultInt < 0 || Enum.GetValues(typeof(RunResult)).Length <= resultInt )
+            int resultInt = ( int )resultObj;
+            if ( resultInt < 0 || Enum.GetValues( typeof( RunResult ) ).Length <= resultInt )
                 {
                 return false;
                 }
 
-            result = ( RunResult ) resultInt;
+            result = ( RunResult )resultInt;
             return true;
             }
 

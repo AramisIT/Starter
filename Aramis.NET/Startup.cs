@@ -26,10 +26,6 @@ namespace Aramis.NET
             return isReleaseMode;
             }
 
-        private const string DATABASE_NAME = "AramisITApplication";
-        private const string DATABASE_LOGIN = "AramisUpdateFilesGetter";
-        private const string DATABASE_PASSWORD = "vjhrjdysqcjrjcnsdftn";
-        private static readonly string CONNECTION_STRING = GetConnectionString();
         private const string STARTER_NAME = "AramisStarter.dll";
         private static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
         private static readonly string SOLUTIONS_PATH = STARTER_PATH + @"\Solutions.xml";
@@ -48,27 +44,14 @@ namespace Aramis.NET
                 }
             }
 
-        // private static readonly string FULL_STARTER_NAME = @"X:\SOFTWARE\Starter\Starter\bin\Release\Starter.dll";
-
-        private static string GetConnectionString()
-            {
-            return string.Format( "Data Source={0};Initial Catalog={1};User ID={2};Password={3}",
-                GetDataSource(),
-                DATABASE_NAME,
-                DATABASE_LOGIN,
-                DATABASE_PASSWORD );
-            }
-
-        private static string GetDataSource()
-            {
-            return ConfigurationManager.AppSettings[ "DataBaseComputer" ] ?? "localhost";
-            }
+        // private static readonly string FULL_STARTER_NAME = @"X:\SOFTWARE\Starter\Starter\bin\Release\Starter.dll"; 
 
         #endregion
 
 
 
         private static Mutex starterRuningMutex = new Mutex( false, "Aramis.Net_StarterRuningUpdating" );
+        private const int BUFFER_SIZE = 256 * 128;
 
         [STAThread()]
         static void Main( string[] args )
@@ -84,7 +67,7 @@ namespace Aramis.NET
                 }
 
             IStarter starter = GetStarter();
-            
+
             ExitMutex( starterRuningMutex );
 
             if ( starter != null )
@@ -99,13 +82,10 @@ namespace Aramis.NET
             if ( !File.Exists( FULL_STARTER_NAME ) )
                 {
                 starterHasBeenInstalled = InstallStarter();
-                if ( !starterHasBeenInstalled )
+
+                if ( !starterHasBeenInstalled || !File.Exists( FULL_STARTER_NAME ) )
                     {
-                    return false;
-                    }
-                if ( !File.Exists( FULL_STARTER_NAME ) )
-                    {
-                    MessageBox.Show( string.Format( "Не удалось загрузить из базы файл: {0}", STARTER_NAME ) );
+                    ShowError( string.Format( "Не удалось загрузить из базы файл: {0}", STARTER_NAME ) );
                     return false;
                     }
                 }
@@ -125,7 +105,7 @@ namespace Aramis.NET
 
             if ( matchedTypes.Count == 0 )
                 {
-                MessageBox.Show( "Не удалось найти класс, реализующий IStarter в загрузчике.", "Aramis.NET", MessageBoxButton.OK, MessageBoxImage.Error );
+                ShowError( "Не удалось найти класс, реализующий IStarter в загрузчике." );
                 return null;
                 }
             else
@@ -143,27 +123,27 @@ namespace Aramis.NET
                 Directory.CreateDirectory( STARTER_PATH );
                 }
 
+            SqlConnection conn = DatabaseHelper.GetOpenedConnection();
+            if ( conn == null )
+                {
+                return false;
+                }
+
             try
                 {
-                using ( SqlConnection connection = new SqlConnection( CONNECTION_STRING ) )
+                using ( SqlCommand command = conn.CreateCommand() )
                     {
-                    connection.Open();
-                    using ( SqlCommand command = connection.CreateCommand() )
+                    command.CommandText = "select [UpdateFile], LEN([UpdateFile]) FileSize, RTRIM([FileName]) FileName from [Loader]";
+                    using ( SqlDataReader dataReader = command.ExecuteReader() )
                         {
-                        command.CommandText = "select [FileData], [FileName] from dbo.StarterFiles";
-                        using ( SqlDataReader dataReader = command.ExecuteReader() )
+                        while ( dataReader.Read() )
                             {
-                            byte[] buffer;
-                            while ( dataReader.Read() )
+                            string filePath = String.Format( @"{0}\{1}", STARTER_PATH, dataReader[ "FileName" ] as string );
+                            long fileSize = Convert.ToInt64( dataReader[ "FileSize" ] );
+                            if ( !SaveTemporaryFile( filePath, fileSize, dataReader ) )
                                 {
-                                string filePath = String.Format( @"{0}\{1}", STARTER_PATH, dataReader[ "FileName" ] as string );
-                                buffer = ( byte[] )dataReader[ "FileData" ];
-
-                                FileStream fileStream = File.Create( filePath );
-                                fileStream.Write( buffer, 0, buffer.Length );
-                                fileStream.Close();
+                                throw new Exception( string.Format( "Не удалось сохранить загруженный файл ({0})", filePath ) );
                                 }
-                            dataReader.Close();
                             }
                         }
                     }
@@ -172,7 +152,69 @@ namespace Aramis.NET
                 {
                 string errorMessage = string.Format( "Ошибка при инсталяции стартера: {0}\r\n\r\nПриложение будет закрыто.", exp.Message );
                 Trace.WriteLine( errorMessage );
-                MessageBox.Show( errorMessage );
+                ShowError( errorMessage );
+                return false;
+                }
+            finally
+                {
+                ( ( IDisposable )conn ).Dispose();
+                }
+
+            return true;
+            }
+
+        private static void ShowError( string errorMessage )
+            {
+            MessageBox.Show( errorMessage, "Aramis .NET starter", MessageBoxButton.OK, MessageBoxImage.Error );
+            }
+
+        private static bool SaveTemporaryFile( string filePath, long fileSize, SqlDataReader dataReader )
+            {
+            FileStream file;
+            byte[] readBuffer = new byte[ BUFFER_SIZE ];
+            int readerPosition = 0;
+            int bytesReaded;
+            try
+                {
+                file = new FileStream( filePath, FileMode.Create );
+
+                try
+                    {
+                    while ( readerPosition < fileSize )
+                        {
+                        bytesReaded = ( int )dataReader.GetBytes( 0, readerPosition, readBuffer, 0, BUFFER_SIZE );
+                        file.Write( readBuffer, 0, bytesReaded );
+
+                        readerPosition += bytesReaded;
+                        }
+                    }
+                catch
+                    {
+                    file.Close();
+
+                    DeleteFile( filePath );
+
+                    return false;
+                    }
+
+                file.Close();
+                }
+            catch
+                {
+                return false;
+                }
+
+            return true;
+            }
+
+        private static bool DeleteFile( string filePath )
+            {
+            try
+                {
+                File.Delete( filePath );
+                }
+            catch
+                {
                 return false;
                 }
 

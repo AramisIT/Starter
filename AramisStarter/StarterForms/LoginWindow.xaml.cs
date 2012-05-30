@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AramisStarter.Utils;
 using Windows;
 
 namespace AramisStarter
@@ -26,27 +27,56 @@ namespace AramisStarter
     /// </summary>
     public partial class LoginWindow : Window
         {
-        private SolutionInfo solution;
-        private Splash splash;
-
         private LoginWindow()
             {
             InitializeComponent();
-            Icon = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.Transparent);
+            Icon = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.Transparent );            
             }
 
-        private void Window_Loaded_1( object sender, RoutedEventArgs e )
+        private void Window_Loaded( object sender, RoutedEventArgs e )
             {
-            Title = string.Format( Title, solution.SolutionFriendlyName );
-            VistaGlassHelper.ExtendGlass( this, -1, -1, -1, -1 );
+            Title = string.Format( Title, App.SelectedSolution.SolutionFriendlyName );
+            if ( !VistaGlassHelper.ExtendGlass( this, -1, -1, -1, -1 ) )
+                {
+                UseAlternativeStyle();
+                }
             FillNames();
+            SelectLastLogin();
+            }
+
+        private void UseAlternativeStyle()
+            {
+            backGroungImage.Source = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.BBB );
+            //ImageSource imgSource = new ImageSource();
+            //this.Background = new ImageBrush(imgSource);
+            backGroungImage.Visibility = System.Windows.Visibility.Visible;
+            }
+
+        private void SelectLastLogin()
+            {
+            string lastLogin = Authorization.GetLastLogin();
+
+            if ( lastLogin == null )
+                {
+                return;
+                }
+
+            foreach ( ComboBoxItem item in NamesDescriptions.Items )
+                {
+                string id = item.Tag as string;
+                if ( lastLogin == id )
+                    {
+                    NamesDescriptions.SelectedItem = item;
+                    return;
+                    }
+                }
             }
 
         private void FillNames()
             {
             NamesDescriptions.Items.Clear();
 
-            using ( SqlConnection conn = new SqlConnection( DBChecker.GetConnectionString( solution.SqlServerName, solution.SolutionName, "GetUsersDescriptions" ) ) )
+            using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName, "GetUsersDescriptions" ) ) )
                 {
                 try
                     {
@@ -85,7 +115,7 @@ namespace AramisStarter
 
         private void ShowError( string errorMessage = "Неверный пароль" )
             {
-            savePasswordButton.Visibility = System.Windows.Visibility.Collapsed;
+            savePasswordCheckBox.Visibility = System.Windows.Visibility.Collapsed;
             goButton.Visibility = System.Windows.Visibility.Collapsed;
 
             myMessage.Text = errorMessage;
@@ -99,7 +129,7 @@ namespace AramisStarter
 
         private bool CheckPassword( string userId, SecureString securePassword )
             {
-            return DBChecker.CheckPassword( solution.SqlServerName, solution.SolutionName, userId, securePassword );
+            return DatabaseHelper.CheckPassword( userId, securePassword );
             }
 
         private void passwordTextBox_PasswordChanged( object sender, RoutedEventArgs e )
@@ -110,17 +140,35 @@ namespace AramisStarter
 
         private void UpdateSavePasswordOption()
             {
-            savePasswordButton.Visibility = passwordBox.Password.Length == 0 ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+            savePasswordCheckBox.Visibility = passwordBox.Password.Length == 0 ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+            if ( passwordBox.SecurePassword.Length == 0 )
+                {
+                SavePassword = false;
+                savedPassword = null;
+                }
             }
 
         private void ComboBox_SelectionChanged_1( object sender, SelectionChangedEventArgs e )
-            {            
-            HideErrorMessage();
-            }
-
-        internal void SetSolution( SolutionInfo selectedSolution )
             {
-            this.solution = selectedSolution;
+            HideErrorMessage();
+            bool passwordWasSaved = SavePassword;
+            savedPassword = Authorization.TryToRestoreQuickStart( UserName );
+            SavePassword = savedPassword != null;
+
+            if ( SavePassword )
+                {
+                passwordBox.Password = "************";
+                }
+            else if ( passwordWasSaved )
+                {
+                passwordBox.Password = "";
+                }
+
+            if ( NamesDescriptions.SelectedItem != null )
+                {
+                object itemTag = ( NamesDescriptions.SelectedItem as ComboBoxItem ).Tag;
+                UserName = itemTag as string;
+                }
             }
 
         private void passwordBox_KeyDown( object sender, KeyEventArgs e )
@@ -131,6 +179,12 @@ namespace AramisStarter
                 }
             }
 
+        private static void ShowSplash()
+            {
+            Splash.SplashWindow.SetProgress( SolutionUpdater.DownloadingComplateProgress );
+            Splash.SplashWindow.ShowSlowly();
+            }
+
         private void TryToLogin()
             {
             if ( NamesDescriptions.SelectedItem != null )
@@ -139,10 +193,15 @@ namespace AramisStarter
 
                 if ( passwordCorrect )
                     {
+                    SaveAuthorization();
+                    Hide();
                     ShowSplash();
+                    authorized = true;
+                    Starter.Init( App.SelectedSolution );
                     }
                 else
                     {
+                    savedPassword = null;
                     ShowError();
                     passwordBox.Focus();
                     return;
@@ -150,10 +209,17 @@ namespace AramisStarter
                 }
             }
 
-        private void ShowSplash()
+        private void SaveAuthorization()
             {
-            Hide();
-            Starter.RunApplication();            
+            Authorization.SaveLastLogin( UserName );
+            if ( SavePassword )
+                {
+                Authorization.SaveQuickStart( UserName, UserPassword );
+                }
+            else
+                {
+                Authorization.EraseQuickStartData( UserName );
+                }
             }
 
         private void HideErrorMessage()
@@ -167,6 +233,9 @@ namespace AramisStarter
             }
 
         private static LoginWindow window;
+
+        private static SecureString savedPassword;
+        private volatile bool authorized;
 
         internal static LoginWindow Window
             {
@@ -182,23 +251,27 @@ namespace AramisStarter
 
         internal static string UserName
             {
-            get
-                {
-                if ( Window.NamesDescriptions.SelectedItem != null )
-                    {
-                    object itemTag = ( Window.NamesDescriptions.SelectedItem as ComboBoxItem ).Tag;
-                    return itemTag as string;
-                    }
-
-                return "";
-                }
+            get;
+            private set;
             }
 
         internal static SecureString UserPassword
             {
             get
                 {
-                return Window.passwordBox.SecurePassword;
+                return savedPassword ?? Window.passwordBox.SecurePassword;
+                }
+            }
+
+        private static bool SavePassword
+            {
+            get
+                {
+                return Window.savePasswordCheckBox.IsChecked == true;
+                }
+            set
+                {
+                Window.savePasswordCheckBox.IsChecked = value;
                 }
             }
 
@@ -207,6 +280,14 @@ namespace AramisStarter
             if ( e.Key == Key.Enter )
                 {
                 passwordBox.Focus();
+                }
+            }
+
+        internal static bool Authorized
+            {
+            get
+                {
+                return Window.authorized;
                 }
             }
         }

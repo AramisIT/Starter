@@ -1,45 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 using Aramis.NET;
+using AramisStarter.Utils;
 
 namespace AramisStarter
     {
     public class App : Application, IStarter
         {
-        internal static string SolutionsPath
-            {
-            get;
-            private set;
-            }
+        #region private
+
+        private const string SOLUTION_NODE = "Solution";
+
+        private const string SERVER_XML_NAME = "ServerName";
+
+        private const string SQL_BASE_NAME_XML_NAME = "DatabaseName";
+
+        private const string ROOT_NODE_NAME = "root";
+
+        private const string NAME_ATTRIBUTE = "Name";
+
+        private const string SERVER_FRIENDLY_XML_NAME = "SolutionFriendlyName";
+
+        private const string DEFAULT_SOLUTION = "DefaultSolution";
 
         private List<SolutionInfo> solutions;
-        private const string SOLUTION_NODE = "Solution";
-        private const string SERVER_NODE_NAME = "ServerName";
-        private const string ROOT_NODE_NAME = "root";
-        private const string NAME_ATTRIBUTE = "Name";
-        private const string SERVER_FRIENDLY_NODE_NAME = "SolutionFriendlyName";
 
         private void SaveSolutionsList()
             {
             XElement doc = new XElement( ROOT_NODE_NAME );
+            doc.SetAttributeValue( DEFAULT_SOLUTION, "" );
+
             solutions.ForEach( solutionInfo =>
                 {
                     XElement solutionXElement = new XElement( SOLUTION_NODE );
                     solutionXElement.SetAttributeValue( NAME_ATTRIBUTE, solutionInfo.SolutionName );
-                    solutionXElement.Add( new XElement( SERVER_FRIENDLY_NODE_NAME, solutionInfo.SolutionFriendlyName ) );
-                    solutionXElement.Add( new XElement( SERVER_NODE_NAME, solutionInfo.SqlServerName ) );
+                    solutionXElement.Add( new XElement( SERVER_FRIENDLY_XML_NAME, solutionInfo.SolutionFriendlyName ) );
+                    solutionXElement.Add( new XElement( SQL_BASE_NAME_XML_NAME, solutionInfo.SqlBaseName ) );
+                    solutionXElement.Add( new XElement( SERVER_XML_NAME, solutionInfo.SqlServerName ) );
                     doc.Add( solutionXElement );
                 } );
 
             try
                 {
-                doc.Save( App.SolutionsPath );
+                doc.Save( solutionsPath );
                 }
             catch
                 {
@@ -64,8 +75,9 @@ namespace AramisStarter
                         SolutionInfo solutionInfo = new SolutionInfo();
 
                         solutionInfo.SolutionName = solutionXElement.Attribute( NAME_ATTRIBUTE ).Value;
-                        solutionInfo.SqlServerName = solutionXElement.Element( SERVER_NODE_NAME ).Value;
-                        solutionInfo.SolutionFriendlyName = solutionXElement.Element( SERVER_FRIENDLY_NODE_NAME ).Value;
+                        solutionInfo.SqlServerName = solutionXElement.Element( SERVER_XML_NAME ).Value;
+                        solutionInfo.SolutionFriendlyName = solutionXElement.Element( SERVER_FRIENDLY_XML_NAME ).Value;
+                        solutionInfo.SqlBaseName = solutionXElement.Element( SQL_BASE_NAME_XML_NAME ).Value;
 
                         newSolutionsList.Add( solutionInfo );
                     } );
@@ -84,11 +96,11 @@ namespace AramisStarter
 
         private string ReadSolutionsFromDisk()
             {
-            if ( File.Exists( SolutionsPath ) )
+            if ( File.Exists( solutionsPath ) )
                 {
                 try
                     {
-                    return File.ReadAllText( SolutionsPath ).Trim();
+                    return File.ReadAllText( solutionsPath ).Trim();
                     }
                 catch ( Exception exp )
                     {
@@ -101,8 +113,56 @@ namespace AramisStarter
                 }
             }
 
+        /// <summary>
+        /// Пусть к xml-файлу со списком доступных решений
+        /// </summary>
+        private string solutionsPath;
+
+        private static void InitWithSelectedSolution()
+            {
+            SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}.{2}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ),
+               SelectedSolution.SolutionName, SelectedSolution.SqlBaseName );
+
+            RegistryHelper.Init( SelectedSolution.SolutionName, SelectedSolution.SqlBaseName );
+
+            SolutionUpdater.Init();
+            }
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Загружаемое решение
+        /// </summary>
+        internal static SolutionInfo SelectedSolution
+            {
+            get;
+            private set;
+            }
+
+        /// <summary>
+        /// Путь к каталогу решения. Заканчивается на "\".
+        /// </summary>
+        internal static string SolutionDirPath
+            {
+            get;
+            private set;
+            }
+
+        public App( string solutionsPath )
+            : base()
+            {
+            this.solutionsPath = solutionsPath;
+            }
+
         public void Start( string[] args )
             {
+            if ( Thread.CurrentThread.Name == null )
+                {
+                Thread.CurrentThread.Name = "Main starter thread";
+                }
+
             ReadSolutions();
 
             // Нужно что это окно было создано первым, т.к. оно будет главным
@@ -136,26 +196,19 @@ namespace AramisStarter
 
             if ( SelectedSolution != null )
                 {
-                mainWindow.SetSolution( SelectedSolution );
-                Starter.BeginSolutionLoading( SelectedSolution );
+                InitWithSelectedSolution();
                 Run( mainWindow );
                 }
             }
 
-        public App( string solutionsPath )
+        internal static void Stop()
             {
-            App.SolutionsPath = solutionsPath;
+            SolutionUpdater.Stop();
+            LoginWindow.Window.Dispatcher.Invoke( () => LoginWindow.Window.Close() );
             }
 
-        public App()
-            : base()
-            {
-            }
+        #endregion
 
-        internal static SolutionInfo SelectedSolution
-            {
-            get;
-            private set;
-            }
+
         }
     }

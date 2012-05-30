@@ -68,7 +68,8 @@ namespace Aramis.Loader
             set
                 {
                 solutionName = value;
-                SolutionPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Aramis .NET\\" + value + "\\";
+                SolutionPath = @"X:\My work\Projects\UTK\SOFTWARE\GreenHouse\GreenHouse\bin\Release\GreenHouse.exe";// Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + "\\Aramis .NET\\" + value + "\\";
+                SolutionPath = @"X:\My work\Projects\UTK\SOFTWARE\Aramis.NET\PlatformTest\bin\Release\PlatformTest.exe";
                 }
             }
 

@@ -60,6 +60,13 @@ namespace AramisStarter.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap BBB {
+            get {
+                object obj = ResourceManager.GetObject("BBB", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap LogoImage {
             get {
                 object obj = ResourceManager.GetObject("LogoImage", resourceCulture);

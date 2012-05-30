@@ -14,6 +14,12 @@ namespace AramisStarter
             set;
             }
 
+        internal string SqlBaseName
+            {
+            get;
+            set;
+            }
+
         internal string SolutionName
             {
             get;

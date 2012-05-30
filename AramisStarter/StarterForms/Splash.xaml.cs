@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,7 @@ namespace AramisStarter
 
         private Splash()
             {
+            Owner = LoginWindow.Window;
             InitializeComponent();
             logoImage.Source = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.LogoImage );
             }
@@ -36,6 +38,8 @@ namespace AramisStarter
             }
 
         private static Splash splashWindow;
+        private const int MAX_PROGRESS_VALUE = 1000;
+        private const int MIN_SPLASH_SHOWING_TIME_MILLISEC = 4000;
 
         internal static Splash SplashWindow
             {
@@ -56,7 +60,6 @@ namespace AramisStarter
                 {
                 SplashWindow.loadingProgress.Value = progressValue;
                 }
-
             }
 
         internal void ShowSlowly()
@@ -78,13 +81,22 @@ namespace AramisStarter
 
             SplashWindow.logoImage.BeginAnimation( OpacityProperty, animation );
             }
-       
+
 
         void checkLoadingStatusWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
             {
-            if ( e.ProgressPercentage == 100 )
+            if ( e.ProgressPercentage > MAX_PROGRESS_VALUE )
                 {
                 Hide();
+                }
+            else if ( e.ProgressPercentage == 0 && Starter.ErrorStart )
+                {
+                Close();
+                LoginWindow.Window.Close();
+                }
+            else
+                {
+                loadingProgress.Value = e.ProgressPercentage;
                 }
             }
 
@@ -92,15 +104,41 @@ namespace AramisStarter
             {
             while ( true )
                 {
-                if ( Starter.SolutionLoaded )
+                if ( Starter.ErrorStart )
                     {
-                    checkLoadingStatusWorker.ReportProgress( 100 );
+                    checkLoadingStatusWorker.ReportProgress( 0 );
                     break;
                     }
 
-                System.Threading.Thread.Sleep(250);
+                if ( Starter.SolutionLoaded )
+                    {
+                    ReportProgress( MAX_PROGRESS_VALUE );
+                    return;
+                    }
+                else
+                    {
+                    ReportProgress( SolutionUpdater.DownloadingComplateProgress );
+                    if ( SolutionUpdater.DownloadingComplateProgress == MAX_PROGRESS_VALUE )
+                        {
+                        return;
+                        }
+                    }
+
+                System.Threading.Thread.Sleep( 250 );
                 }
-            }     
+            }
+
+        private void ReportProgress( int progressValue )
+            {
+            checkLoadingStatusWorker.ReportProgress( progressValue );
+
+            if ( progressValue == MAX_PROGRESS_VALUE )
+                {
+                Thread.Sleep( MIN_SPLASH_SHOWING_TIME_MILLISEC );
+                checkLoadingStatusWorker.ReportProgress( progressValue + 1 );
+                }
+
+            }
 
         private void logoImage_Loaded( object sender, RoutedEventArgs e )
             {
@@ -115,5 +153,26 @@ namespace AramisStarter
             checkLoadingStatusWorker.ProgressChanged += checkLoadingStatusWorker_ProgressChanged;
             checkLoadingStatusWorker.RunWorkerAsync();
             }
+
+        internal void HideWindow()
+            {
+            this.Dispatcher.Invoke( () => this.Hide() );
+            }
+
+        private void Button_Click_1( object sender, RoutedEventArgs e )
+            {
+            SolutionUpdater.ResetVersion();
+            }
+
+        private void Button_Click_2( object sender, RoutedEventArgs e )
+            {
+
+            }
+
+        private void Button_Click_3( object sender, RoutedEventArgs e )
+            {
+            LoginWindow.Window.Close();
+            }
+
         }
     }
