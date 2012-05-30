@@ -1,10 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 11
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loader", "Loader\Loader.csproj", "{C6D30932-3BED-4C96-8699-D3F293ECF230}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Copier", "Copier\Copier.csproj", "{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aramis.NET", "Aramis.NET\Aramis.NET.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisStarter", "AramisStarter\AramisStarter.csproj", "{CE5A42C7-0052-42E3-8C73-0C710412925C}"
@@ -19,26 +15,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Debug|x86.ActiveCfg = Debug|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Debug|x86.Build.0 = Debug|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|Any CPU.ActiveCfg = Release|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|Mixed Platforms.Build.0 = Release|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|x86.ActiveCfg = Release|x86
-		{62D59043-85F3-429C-ACD0-EE57AAE8EA2F}.Release|x86.Build.0 = Release|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|x86.ActiveCfg = Debug|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Debug|x86.Build.0 = Debug|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Release|Any CPU.ActiveCfg = Release|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Release|Mixed Platforms.Build.0 = Release|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Release|x86.ActiveCfg = Release|x86
-		{C6D30932-3BED-4C96-8699-D3F293ECF230}.Release|x86.Build.0 = Release|x86
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

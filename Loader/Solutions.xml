@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<root>
-
-  <solution>
-    <Description>Тест платформы</Description>
-    <ApplicationDirectory>PlatformTest</ApplicationDirectory>
-  </solution>
-</root>
