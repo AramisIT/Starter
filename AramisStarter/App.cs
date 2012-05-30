@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 using Aramis.NET;
@@ -204,7 +203,7 @@ namespace AramisStarter
         internal static void Stop()
             {
             SolutionUpdater.Stop();
-            LoginWindow.Window.Dispatcher.Invoke( () => LoginWindow.Window.Close() );
+            LoginWindow.Window.Dispatcher.Invoke( new Action( () => LoginWindow.Window.Close() ) );
             }
 
         #endregion

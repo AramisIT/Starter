@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -156,7 +156,7 @@ namespace AramisStarter
 
         internal void HideWindow()
             {
-            this.Dispatcher.Invoke( () => this.Hide() );
+            this.Dispatcher.Invoke( new Action( () => this.Hide() ) );
             }
 
         private void Button_Click_1( object sender, RoutedEventArgs e )
