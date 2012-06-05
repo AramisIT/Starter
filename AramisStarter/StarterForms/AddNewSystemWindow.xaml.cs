@@ -36,6 +36,14 @@ namespace AramisStarter
         private void Window_Loaded_1( object sender, RoutedEventArgs e )
             {
             VistaGlassHelper.ExtendGlass( this, -1, -1, -1, -1 );
+            string serverName = Aramis.NET.PublicStarterProperties.DefaultServerName;
+            if ( serverName != null )
+                {
+                serverNameTextBox.Text = serverName;
+                serverNameTextBox.SelectionStart = serverName.Length;
+                serverNameTextBox.SelectionLength = 0;
+                serverNameTextBox.Focus();
+                }
             }
 
         private void Button_Click_1( object sender, RoutedEventArgs e )
@@ -50,55 +58,11 @@ namespace AramisStarter
                 return;
                 }
 
-            ComboBoxItem comboBoxItem = databaseNameComboBox.SelectedItem as ComboBoxItem;
-            string databaseName = comboBoxItem.Content as string;
-            NewSolution = new SolutionInfo()
-                {
-                    SqlServerName = serverNameTextBox.Text.Trim(),
-                    SqlBaseName = databaseName
-                };
-            SetSystemName( NewSolution );
+            ComboBoxItem currentItem = databaseNameComboBox.SelectedItem as ComboBoxItem;
+            NewSolution = currentItem.Tag as SolutionInfo;           
             Close();
             }
-
-        private void SetSystemName( SolutionInfo solution )
-            {
-            string systemNameInfo = GetSystemNameInfo( solution.SqlBaseName );
-
-            int separatorIndex = systemNameInfo.IndexOf( ';' );
-
-            if ( separatorIndex <= 0 )
-                {
-                solution.SolutionName = solution.SqlBaseName;
-                solution.SolutionFriendlyName = solution.SqlBaseName;
-                }
-            else
-                {
-                solution.SolutionName = systemNameInfo.Substring( 0, separatorIndex );
-                solution.SolutionFriendlyName = systemNameInfo.Substring( separatorIndex + 1, systemNameInfo.Length - ( separatorIndex + 1 ) );
-                }
-            }
-
-        private string GetSystemNameInfo( string databaseName )
-            {
-            try
-                {
-                using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverNameTextBox.Text.Trim(), databaseName, "GetUsersDescriptions" ) ) )
-                    {
-                    conn.Open();
-                    using ( SqlCommand cmd = new SqlCommand( "select dbo.GetAramisSystemName()", conn ) )
-                        {
-                        string result = cmd.ExecuteScalar() as string;
-                        return result;
-                        }
-                    }
-                }
-            catch
-                {
-                return databaseName;
-                }
-            }
-
+        
         private void serverNameTextBox_LostFocus( object sender, RoutedEventArgs e )
             {
             FillDatabasesList();
@@ -108,40 +72,27 @@ namespace AramisStarter
             {
             databaseNameComboBox.Items.Clear();
 
-            using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverNameTextBox.Text.Trim() ) ) )
+            string errorMessage;
+            List<SolutionInfo> databasesInfo = DatabaseHelper.GetDatabasesList( serverNameTextBox.Text.Trim(), out errorMessage );
+
+            if ( errorMessage == null )
                 {
-                try
+                databasesInfo.ForEach( databaseInfo =>
                     {
-                    conn.Open();
-                    }
-                catch ( Exception exp )
+                        ComboBoxItem item = new ComboBoxItem();
+                        item.Content = databaseInfo.SqlBaseName;
+                        item.Tag = databaseInfo;
+                        databaseNameComboBox.Items.Add( item );
+                    } );
+                if ( databaseNameComboBox.Items.Count > 0 )
                     {
-                    ShowError( "Не обнаружен сервер" );
-                    return;
+                    databaseNameComboBox.SelectedItem = databaseNameComboBox.Items[ 0 ];
                     }
-
-                try
-                    {
-                    using ( SqlCommand cmd = new SqlCommand( "GetAramisDatabasesList", conn ) )
-                        {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        using ( SqlDataReader reader = cmd.ExecuteReader() )
-                            {
-                            while ( reader.Read() )
-                                {
-                                ComboBoxItem item = new ComboBoxItem();
-                                item.Content = reader[ 0 ].ToString();
-
-                                databaseNameComboBox.Items.Add( item );
-                                }
-                            }
-                        }
-                    }
-                catch ( Exception exp )
-                    {
-                    Trace.WriteLine( exp.Message );
-                    ShowError( "Не удалось получить список информационных баз" );
-                    }
+                }
+            else
+                {
+                ShowError( errorMessage );
+                return;
                 }
             }
 
@@ -159,8 +110,7 @@ namespace AramisStarter
                 databaseNameComboBox.Focus();
                 }
             }
-
-
+        
         internal SolutionInfo NewSolution
             {
             get;
@@ -185,6 +135,15 @@ namespace AramisStarter
             goButton.Visibility = System.Windows.Visibility.Visible;
             myMessage.Visibility = Visibility.Hidden;
             myMessage.Text = "";
+            }
+
+        private void databaseNameComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
+            {
+            if ( databaseNameComboBox.SelectedItem != null)
+                {
+                SolutionInfo currentSolutionInfo = ( ( ComboBoxItem )databaseNameComboBox.SelectedItem ).Tag as SolutionInfo;
+                solutionNameTextBox.Text = currentSolutionInfo.SolutionName;
+                }
             }
         }
     }

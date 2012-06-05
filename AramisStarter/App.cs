@@ -47,8 +47,13 @@ namespace AramisStarter
                     doc.Add( solutionXElement );
                 } );
 
+            string directoryName = Path.GetDirectoryName( solutionsPath );
             try
                 {
+                if ( !Directory.Exists( directoryName ) )
+                    {
+                    Directory.CreateDirectory( directoryName );
+                    }
                 doc.Save( solutionsPath );
                 }
             catch

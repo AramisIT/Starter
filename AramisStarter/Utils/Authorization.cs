@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-
+using System.Windows;
 using Microsoft.Win32;
 
 namespace AramisStarter.Utils
@@ -20,6 +20,7 @@ namespace AramisStarter.Utils
         private const string L_REG_KEY = "QuickLogin";
         private const string A_REG_KEY = "A";
         private const string C_REG_KEY = "AA";
+        private const string ID_REG_KEY = "Id";
 
         static Authorization()
             {
@@ -76,17 +77,20 @@ namespace AramisStarter.Utils
 
         private static void SaveQuickStartData( string l, byte[] a, byte[] b, byte[] c )
             {
-            if ( WriteQSToDatabase( c, b ) )
+            Guid g = Guid.NewGuid();
+
+            if ( DatabaseHelper.WriteQuickStart( g, b ) )
                 {
-                WriteQSToRegistry( l, a, c );
+                WriteQSToRegistry( l, a, c, g );
                 }
             }
 
         private static bool ReadQS( string l, out byte[] a, out byte[] b, out byte[] c )
             {
-            if ( ReadQSFromRegistry( l, out a, out c ) )
+            Guid g;
+            if ( ReadQSFromRegistry( l, out a, out c, out g ) )
                 {
-                return ReadQSFromDatabase( c, out b );
+                return DatabaseHelper.ReadQuickStart( g, out b );
                 }
             else
                 {
@@ -97,18 +101,20 @@ namespace AramisStarter.Utils
                 }
             }
 
-        private static void WriteQSToRegistry( string l, byte[] a, byte[] c )
+        private static void WriteQSToRegistry( string l, byte[] a, byte[] c, Guid g )
             {
             registryKey.SetValue( L_REG_KEY, l );
             registryKey.SetValue( A_REG_KEY, a );
             registryKey.SetValue( C_REG_KEY, c );
+            registryKey.SetValue( ID_REG_KEY, g );
             }
 
-        private static bool ReadQSFromRegistry( string l, out byte[] a, out byte[] c )
+        private static bool ReadQSFromRegistry( string l, out byte[] a, out byte[] c, out Guid g )
             {
             string savedL = null;
             a = new byte[ 0 ];
             c = a;
+            g = new Guid(); ;
 
             try
                 {
@@ -119,6 +125,7 @@ namespace AramisStarter.Utils
                     }
                 a = ( byte[] )registryKey.GetValue( A_REG_KEY );
                 c = ( byte[] )registryKey.GetValue( C_REG_KEY );
+                g = new Guid( registryKey.GetValue( ID_REG_KEY ) as string );
                 }
             catch
                 {
@@ -128,22 +135,12 @@ namespace AramisStarter.Utils
             return true;
             }
 
-        private static bool WriteQSToDatabase( byte[] c, byte[] b )
-            {
-            return DatabaseHelper.WriteQuickStart( GetQuickUser( c ), b );
-            }
-
-        private static bool ReadQSFromDatabase( byte[] c, out byte[] b )
-            {
-            return DatabaseHelper.ReadQuickStart( GetQuickUser( c ), out b );
-            }
-
-        private static byte[] GetQuickUser( byte[] c )
-            {
-            string currentUserSID = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
-            string distortUserSID = Encryptor.Distort( currentUserSID, currentUserSID + DISTORTION );
-            return ( new UTF8Encoding() ).GetBytes( distortUserSID );
-            }
+        //private static byte[] GetQuickUser( byte[] c )
+        //    {
+        //    string currentUserSID = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
+        //    string distortUserSID = Encryptor.Distort( currentUserSID, currentUserSID + DISTORTION );
+        //    return ( new UTF8Encoding() ).GetBytes( distortUserSID );
+        //    }
 
         private static void FillSStr( SecureString secureString, byte[] dataArray )
             {
@@ -178,6 +175,8 @@ namespace AramisStarter.Utils
 
         internal static void SaveQuickStart( string userName, SecureString userPassword )
             {
+            EraseQuickStartData( userName );
+
             byte[] data = ConvertToByte( userPassword ), key, IV;
             byte[] encryptedData = Encryptor.EncryptData( data, out key, out IV );
             Array.Clear( data, 0, data.Length );
@@ -207,7 +206,7 @@ namespace AramisStarter.Utils
 
             return secureString;
             }
-        
+
         internal static void EraseQuickStartData( string userName )
             {
             string savedL = registryKey.GetValue( L_REG_KEY ) as string;
@@ -216,10 +215,10 @@ namespace AramisStarter.Utils
                 return;
                 }
 
-            byte[] c = ( byte[] )registryKey.GetValue( C_REG_KEY );
-            if ( c != null )
+            object idObj = registryKey.GetValue( ID_REG_KEY );
+            if ( idObj != null )
                 {
-                DatabaseHelper.EraseQuickStart( GetQuickUser( c ) );
+                DatabaseHelper.EraseQuickStart( new Guid( idObj as String ) );
                 }
 
             #region delete from registry
@@ -229,12 +228,13 @@ namespace AramisStarter.Utils
                 registryKey.DeleteValue( L_REG_KEY );
                 registryKey.DeleteValue( A_REG_KEY );
                 registryKey.DeleteValue( C_REG_KEY );
+                registryKey.DeleteValue( ID_REG_KEY );
                 }
             catch { }
 
             #endregion
             }
-        
+
         #endregion
 
         }

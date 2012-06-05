@@ -1,7 +1,8 @@
-﻿<Window x:Class="AramisStarter.AddNewSystemWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Добавление новой информационной базы" Height="190" Width="395" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="Transparent" Loaded="Window_Loaded_1">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="AramisStarter.AddNewSystemWindow"
+        Title="Добавление новой информационной базы" Height="238" Width="395" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="Transparent" Loaded="Window_Loaded_1">
     <Window.Resources>
         <Style TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Calibri"/>
@@ -21,56 +22,60 @@
             <Setter Property="VerticalAlignment" Value="Bottom"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Margin" Value="0,0,40,0"/>            
+            <Setter Property="Margin" Value="0,0,40,0"/>
         </Style>
     </Window.Resources>
-<!--Background="#699F"-->
     <Grid  ShowGridLines="False">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                <GradientStop Offset="0" Color="#6000"></GradientStop>
-                <GradientStop Offset="0.2" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.3" Color="#688F"></GradientStop>
+                <GradientStop Offset="0" Color="#6000"/>
+                <GradientStop Offset="0.2" Color="#688F"/>
+                <GradientStop Offset="0.3" Color="#688F"/>
                 <!--<GradientStop Offset="0.4" Color="#A55D"></GradientStop>-->
-                <GradientStop Offset="0.5" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.6" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.8" Color="#6000"></GradientStop>
+                <GradientStop Offset="0.5" Color="#688F"/>
+                <GradientStop Offset="0.6" Color="#688F"/>
+                <GradientStop Offset="0.8" Color="#6000"/>
             </LinearGradientBrush>
         </Grid.Background>
-        <Grid.RowDefinitions>            
-            <RowDefinition Height="55"></RowDefinition>
-            <RowDefinition Height="40"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition ></RowDefinition>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition Width="250"></ColumnDefinition>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="255"/>
         </Grid.ColumnDefinitions>
-        
-        <TextBlock Grid.Row="0" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Сервер</TextBlock>
-        <TextBlock Grid.Row="1" Style="{StaticResource LoginPasswLabel}" Foreground="White" >Имя базы</TextBlock>
 
-        <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="serverNameTextBox" LostFocus="serverNameTextBox_LostFocus" KeyDown="serverNameTextBox_KeyDown" TextChanged="serverNameTextBox_TextChanged" ></TextBox>
-       
-        <ComboBox FontSize="12" Grid.Row="1" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="databaseNameComboBox" KeyDown="databaseNameComboBox_KeyDown">
+        <TextBlock Grid.Row="0" Style="{StaticResource LoginPasswLabel}" Foreground="White" d:LayoutOverrides="Margin" Text="Сервер"/>
+        <TextBlock Grid.Row="1" Style="{StaticResource LoginPasswLabel}" Foreground="White" d:LayoutOverrides="Margin" Text="Имя базы"/>
+        <TextBlock Grid.Row="2" Style="{StaticResource LoginPasswLabel}" Foreground="White" d:LayoutOverrides="Margin" Text="Система"/>
+
+        <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="serverNameTextBox" LostFocus="serverNameTextBox_LostFocus" KeyDown="serverNameTextBox_KeyDown" TextChanged="serverNameTextBox_TextChanged" d:LayoutOverrides="Margin" />
+
+        <ComboBox FontSize="12" Grid.Row="1" Grid.Column="1" x:Name="databaseNameComboBox" KeyDown="databaseNameComboBox_KeyDown" d:LayoutOverrides="Margin" SelectionChanged="databaseNameComboBox_SelectionChanged">
             <ComboBox.Resources>
-                <Style TargetType="ComboBoxItem">
+                <Style TargetType="{x:Type ComboBoxItem}">
                     <Setter Property="FontSize" Value="16"/>
                 </Style>
             </ComboBox.Resources>
-            <ComboBoxItem Content="Гордий Роман Иванович"/>
-            <ComboBoxItem Content="Горовая Ярослава"/>
-        </ComboBox>  
+            <ComboBox.Style>
+                <StaticResource ResourceKey="LoginPasswLabelBox"/>
+            </ComboBox.Style>
+        </ComboBox>
+
+        <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" x:Name="solutionNameTextBox" IsReadOnly="True" Background="#FFE8E8E8"/>
         
-        <Button Grid.ColumnSpan="2" Grid.Row="3" MaxHeight="25" MaxWidth="200"  FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Click="Button_Click_1" Margin="0,0,0,0" x:Name="goButton">OK</Button>
-        <TextBlock  Visibility="Hidden" Grid.ColumnSpan="2" Grid.Row="3" x:Name="myMessage" MinHeight="0" Text="База не найдена" TextWrapping="Wrap" TextAlignment="Center" >
-        	<TextBlock.Foreground>
-        		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-        			<GradientStop Color="#FFF0BFBF" Offset="0.004"/>
-        			<GradientStop Color="#FFF71B1B" Offset="1"/>
-        		</LinearGradientBrush>
-        	</TextBlock.Foreground>
+        <Button Grid.ColumnSpan="2" Grid.Row="4" MaxHeight="25" MaxWidth="200"  FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Click="Button_Click_1" Margin="0,0,0,0" x:Name="goButton" Content="OK" d:LayoutOverrides="Margin"/>
+        <TextBlock  Visibility="Hidden" Grid.ColumnSpan="2" Grid.Row="4" x:Name="myMessage" MinHeight="0" Text="База не найдена" TextWrapping="Wrap" TextAlignment="Center" d:LayoutOverrides="Margin" >
+			<TextBlock.Foreground>
+				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+					<GradientStop Color="#FFF0BFBF" Offset="0.004"/>
+					<GradientStop Color="#FFF71B1B" Offset="1"/>
+				</LinearGradientBrush>
+			</TextBlock.Foreground>
         </TextBlock>
     </Grid>
 </Window>

@@ -132,7 +132,7 @@ namespace Aramis.NET
                 {
                 using ( SqlCommand command = conn.CreateCommand() )
                     {
-                    command.CommandText = "select [UpdateFile], LEN([UpdateFile]) FileSize, RTRIM([FileName]) FileName from [Loader]";
+                    command.CommandText = "select [Data], LEN([Data]) FileSize, RTRIM([FileName]) FileName from [Starter]";
                     using ( SqlDataReader dataReader = command.ExecuteReader() )
                         {
                         while ( dataReader.Read() )

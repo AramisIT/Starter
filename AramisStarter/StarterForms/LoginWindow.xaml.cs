@@ -76,7 +76,7 @@ namespace AramisStarter
             {
             NamesDescriptions.Items.Clear();
 
-            using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName, "GetUsersDescriptions" ) ) )
+            using ( SqlConnection conn = DatabaseHelper.GetGuestConnection() )
                 {
                 try
                     {
@@ -150,6 +150,12 @@ namespace AramisStarter
 
         private void ComboBox_SelectionChanged_1( object sender, SelectionChangedEventArgs e )
             {
+            if ( NamesDescriptions.SelectedItem != null )
+                {
+                object itemTag = ( NamesDescriptions.SelectedItem as ComboBoxItem ).Tag;
+                UserName = itemTag as string;
+                }
+
             HideErrorMessage();
             bool passwordWasSaved = SavePassword;
             savedPassword = Authorization.TryToRestoreQuickStart( UserName );
@@ -162,13 +168,7 @@ namespace AramisStarter
             else if ( passwordWasSaved )
                 {
                 passwordBox.Password = "";
-                }
-
-            if ( NamesDescriptions.SelectedItem != null )
-                {
-                object itemTag = ( NamesDescriptions.SelectedItem as ComboBoxItem ).Tag;
-                UserName = itemTag as string;
-                }
+                }            
             }
 
         private void passwordBox_KeyDown( object sender, KeyEventArgs e )

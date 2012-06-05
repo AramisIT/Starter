@@ -9,7 +9,7 @@ namespace AramisStarter.Utils
     {
     internal class RegistryHelper
         {
-        private static RegistryKey processesIDsRegistryKey = InitSubKey( "PIDs" );
+        private static RegistryKey processesIDsRegistryKey;
        
         #region public
 
@@ -33,6 +33,7 @@ namespace AramisStarter.Utils
         internal static void Init( string solutionName, string sqlBaseName )
             {
             RegistryMainNodeName = string.Format( @"Software\Aramis .NET\{0}.{1}\", solutionName, sqlBaseName );
+            processesIDsRegistryKey = InitSubKey( "PIDs" );
             }
 
         internal static RegistryKey InitSubKey( string subKeySuffix )

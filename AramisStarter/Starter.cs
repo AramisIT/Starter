@@ -26,6 +26,8 @@ namespace AramisStarter
 
         private const string UPDATE_MODE_VAR_NAME = "UpdateExit";
 
+        private const string FORSED_UPDATE_VAR_NAME = "ForsedUpdate";
+
         private const string UPDATE_EXISTS_VAR_NAME = "UpdatesExists";
 
         private const string LOADED_STR = "AramisSystemLoaded";
@@ -75,7 +77,7 @@ namespace AramisStarter
 
             solutionExecutiveFileName = App.SolutionDirPath + solution.SolutionName + ".exe";
 
-            StartExecutorThread();          
+            StartExecutorThread();
             }
 
         private void StartExecutorThread()
@@ -185,9 +187,10 @@ namespace AramisStarter
                 } while ( !valueSetted );
             }
 
-        private bool ExecuteSolution( out bool exitForUpdate )
+        private bool ExecuteSolution( out bool exitForUpdate, out bool forsedUpdate )
             {
             exitForUpdate = false;
+            forsedUpdate = false;
 
             if ( !RegistrateSolutionExecuting() )
                 {
@@ -203,7 +206,8 @@ namespace AramisStarter
                 }
             catch ( Exception exp )
                 {
-                Trace.WriteLine( string.Format( "ExecuteAssembly error: {0}", exp.Message ) );
+                executionError = string.Format( "ExecuteAssembly error: {0}", exp.Message );
+                Trace.WriteLine( executionError );
 
                 if ( ExecutingTimeUnreallySmall( startTime ) )
                     {
@@ -222,6 +226,7 @@ namespace AramisStarter
             GC.Collect();
             GC.WaitForPendingFinalizers();
             object exitForUpdateObj = solutionDomain.GetData( UPDATE_MODE_VAR_NAME );
+            object forsedUpdateObj = solutionDomain.GetData( FORSED_UPDATE_VAR_NAME );
 
             try
                 {
@@ -239,6 +244,8 @@ namespace AramisStarter
             RegistrateSolutionExit();
 
             exitForUpdate = ( exitForUpdateObj != null ) && ( exitForUpdateObj is bool ) && ( bool )exitForUpdateObj;
+            forsedUpdate = ( forsedUpdateObj != null ) && ( forsedUpdateObj is bool ) && ( bool )forsedUpdateObj;
+
             return true;
             }
 
@@ -278,12 +285,12 @@ namespace AramisStarter
                         return;
                         }
 
-                    bool exitForUpdate;
-                    exit = !ExecuteSolution( out exitForUpdate ) || !exitForUpdate;
+                    bool exitForUpdate, forsedUpdate;
+                    exit = !ExecuteSolution( out exitForUpdate, out forsedUpdate ) || !exitForUpdate;
 
                     if ( exitForUpdate )
                         {
-                        SolutionUpdater.MakeToUpdate();
+                        SolutionUpdater.MakeToUpdate( forsedUpdate );                        
                         }
                     }
                 else
@@ -292,7 +299,7 @@ namespace AramisStarter
                     }
                 }
             while ( !exit );
-            
+
             App.Stop();
             }
 
@@ -302,6 +309,7 @@ namespace AramisStarter
 
         internal const string DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm:ss";
         internal const string EXECUTE_ERROR = "ExecutingError";
+        internal static string executionError;
 
         /// <summary>
         /// Возвращает true если были ошибки при старте, из-за которых приложение не смогло запустится

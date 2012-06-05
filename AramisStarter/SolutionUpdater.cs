@@ -23,6 +23,7 @@ namespace AramisStarter
         private static volatile Int32 downloadingComplateProgress = 0;
 
         private volatile bool readyToRun = false;
+        private volatile bool waitForOtherProcessesComplated;
         private static object resetVersionLocker = new object();
 
         private const int MAX_DOWNLOADING_ATTEMPTS_COUNT = 10;
@@ -65,7 +66,7 @@ namespace AramisStarter
 
         private static object locker = new object();
 
-        private BackgroundWorker updaterThread;
+        private Thread updaterThread;
 
         private static List<Process> GetOtherSameProcessesList( bool forCurrentWinUserOnly = false )
             {
@@ -103,9 +104,8 @@ namespace AramisStarter
 
         private SolutionUpdater()
             {
-            updaterThread = new BackgroundWorker();
-            updaterThread.WorkerSupportsCancellation = true;
-            updaterThread.DoWork += UpdaterThread_DoWork;
+            updaterThread = new Thread( UpdaterThread_DoWork );
+            updaterThread.IsBackground = true;
             }
 
         private bool TryToUpdateFiles()
@@ -141,6 +141,11 @@ namespace AramisStarter
             List<Process> anotherProcesses = GetAnotherProcesses();
             if ( anotherProcesses.Count > 0 )
                 {
+                if ( waitForOtherProcessesComplated && !MaxTimeForSolutionExitExeeded() )
+                    {
+                    return false;
+                    }
+
                 anotherProcesses.ForEach( anotherProcess =>
                     {
                         anotherProcess.Kill();
@@ -148,6 +153,26 @@ namespace AramisStarter
                 }
 
             return UseDownloadedFiles();
+            }
+
+        private bool MaxTimeForSolutionExitExeeded()
+            {
+            if ( startForsedUpdateTime.Date.Equals( EMPTY_TIME ) )
+                {
+                startForsedUpdateTime = DateTime.Now;
+                return false;
+                }
+
+            totalSec = ( int )( ( TimeSpan )( DateTime.Now - startForsedUpdateTime ) ).TotalSeconds;
+
+            bool maxTimeExeeded = totalSec > MAX_TIME_FOR_SOLUTION_EXIT_SEC;
+            if ( maxTimeExeeded )
+                {
+                startForsedUpdateTime = EMPTY_TIME;
+                waitForOtherProcessesComplated = false;
+                }
+
+            return maxTimeExeeded;
             }
 
         /// <summary>
@@ -372,6 +397,7 @@ namespace AramisStarter
             {
             try
                 {
+                ReadUpdateNumber();
                 if ( SolutionUpdateExists() )
                     {
                     bool newUpdatesDownloaded = DownLoadSolutionUpdate();
@@ -386,8 +412,9 @@ namespace AramisStarter
                     return true;
                     }
                 }
-            catch
+            catch ( Exception exp )
                 {
+                Trace.WriteLine( string.Format( "{0}: TryToDownLoadUpdate(); {1}", Process.GetCurrentProcess().Id, exp.Message ) );
                 return false;
                 }
             }
@@ -462,8 +489,9 @@ namespace AramisStarter
                             }
                         }
                     }
-                catch
+                catch ( Exception exp )
                     {
+                    Trace.WriteLine( String.Format( "Ошибка получения файлов: {0}", exp.Message ) );
                     return false;
                     }
                 finally
@@ -767,7 +795,13 @@ namespace AramisStarter
 
         private static void Sleep()
             {
-            Thread.Sleep( 1000 * UPDATE_CHECK_INTERVAL_SEC );
+            try
+                {
+                Thread.Sleep( 1000 * UPDATE_CHECK_INTERVAL_SEC );
+                }
+            catch ( ThreadInterruptedException )
+                {
+                }
             }
 
         private static SolutionUpdater updater;
@@ -820,7 +854,7 @@ namespace AramisStarter
 
         private void StartUpdater()
             {
-            updaterThread.RunWorkerAsync();
+            updaterThread.Start();
             }
 
         private static void InitMutexes()
@@ -832,7 +866,7 @@ namespace AramisStarter
 
         private void TryToUpdateStarter()
             {
-            string queryText = "select top 1 [UpdateFile], LEN([UpdateFile]) fileSize from [Loader] where [FileName] = @FileName and [HashCode] <> @Hash";
+            string queryText = "select top 1 [Data], LEN([Data]) fileSize from [Starter] where [FileName] = @FileName and [HashCode] <> @Hash";
 
             SqlConnection conn = DatabaseHelper.GetUpdateConnection();
             try
@@ -861,8 +895,9 @@ namespace AramisStarter
                                     {
                                     Directory.CreateDirectory( Path.GetDirectoryName( UPDATE_STARTER_PATH ) );
                                     }
-                                catch
+                                catch ( Exception exp )
                                     {
+                                    Trace.WriteLine( "Can't create starter update directory: " + exp.Message );
                                     }
                                 }
 
@@ -881,8 +916,9 @@ namespace AramisStarter
                         }
                     }
                 }
-            catch
+            catch ( Exception exp )
                 {
+                Trace.WriteLine( exp.Message );
                 return;
                 }
             finally
@@ -894,31 +930,6 @@ namespace AramisStarter
                 }
 
             lastCheckingForStarterUpdateTime = DateTime.Now;
-            }
-
-        private void UpdaterThread_DoWork( object sender, DoWorkEventArgs e )
-            {
-            if ( Thread.CurrentThread.Name == null )
-                {
-                Thread.CurrentThread.Name = "Solution updater";
-                }
-
-            while ( !StopWork )
-                {
-                if ( SyncHelper.EnterMutex( TryToUpdateAramisSolution, 1000 ) )
-                    {
-                    TryToPerformUpdating();
-
-                    SyncHelper.ExitMutex( TryToUpdateAramisSolution );
-                    }
-
-                if ( timeToCheckForStarterUpdate )
-                    {
-                    TryToUpdateStarter();
-                    }
-
-                Sleep();
-                }
             }
 
         private void TryToPerformUpdating()
@@ -938,6 +949,31 @@ namespace AramisStarter
                 {
                 downloadingComplateProgress = 1000;
                 readyToRun = true;
+                }
+            }
+
+        private void UpdaterThread_DoWork()
+            {
+            if ( Thread.CurrentThread.Name == null )
+                {
+                Thread.CurrentThread.Name = "Solution updater";
+                }
+
+            while ( !stopWork )
+                {
+                if ( SyncHelper.EnterMutex( TryToUpdateAramisSolution, 1000 ) )
+                    {
+                    TryToPerformUpdating();
+
+                    SyncHelper.ExitMutex( TryToUpdateAramisSolution );
+                    }
+
+                if ( timeToCheckForStarterUpdate )
+                    {
+                    TryToUpdateStarter();
+                    }
+
+                Sleep();
                 }
             }
 
@@ -987,7 +1023,11 @@ namespace AramisStarter
                 }
             }
 
-        internal volatile bool StopWork = false;
+        private volatile bool stopWork = false;
+        private const int MAX_TIME_FOR_SOLUTION_EXIT_SEC = 25;
+        private static readonly DateTime EMPTY_TIME = new DateTime( 1, 1, 1 );
+        private DateTime startForsedUpdateTime = EMPTY_TIME;
+        private int totalSec;
 
         internal static void Init()
             {
@@ -1007,18 +1047,38 @@ namespace AramisStarter
                 return updater.readyToRun;
                 }
             }
-
-        #endregion
-
-
-        internal static void MakeToUpdate()
+        internal static void MakeToUpdate( bool forsedUpdate )
             {
             updater.readyToRun = false;
+            updater.waitForOtherProcessesComplated = forsedUpdate;
             }
 
         internal static void Stop()
             {
-            updater.updaterThread.CancelAsync();
+            updater.stopWork = true;
+            Thread threadToStop = updater.updaterThread;
+
+            try
+                {
+                if ( ( threadToStop.ThreadState & System.Threading.ThreadState.WaitSleepJoin ) > 0 )
+                    {
+                    threadToStop.Interrupt();
+                    Thread.Sleep( 300 );
+                    }
+                }
+            catch { }
+
+            if ( threadToStop.IsAlive )
+                {
+                Thread.Sleep( 300 );
+                if ( threadToStop.IsAlive )
+                    {
+                    threadToStop.Abort();
+                    }
+                }
             }
+
+        #endregion
+
         }
     }
