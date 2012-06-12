@@ -23,6 +23,11 @@ namespace AramisStarter
     /// </summary>
     public partial class Splash : Window
         {
+
+        #region private
+
+        private static object getFormLocker = new object();
+
         private BackgroundWorker checkLoadingStatusWorker;
 
         private Splash()
@@ -40,48 +45,6 @@ namespace AramisStarter
         private static Splash splashWindow;
         private const int MAX_PROGRESS_VALUE = 1000;
         private const int MIN_SPLASH_SHOWING_TIME_MILLISEC = 4000;
-
-        internal static Splash SplashWindow
-            {
-            get
-                {
-                if ( splashWindow == null )
-                    {
-                    splashWindow = new Splash();
-                    }
-                return splashWindow;
-                }
-            }
-
-        internal void SetProgress( int progressValue )
-            {
-            int currentValue = ( int )SplashWindow.loadingProgress.Value;
-            if ( currentValue != progressValue )
-                {
-                SplashWindow.loadingProgress.Value = progressValue;
-                }
-            }
-
-        internal void ShowSlowly()
-            {
-            SplashWindow.logoImage.Opacity = 0;
-            SplashWindow.loadingProgress.Opacity = 0;
-            SplashWindow.progressRect.Opacity = 0;
-
-            splashWindow.Show();
-
-            DoubleAnimation animation = new DoubleAnimation { To = 1, Duration = TimeSpan.FromMilliseconds( 1800 ) };
-            animation.Completed += new EventHandler( ( senderA, eA ) =>
-            {
-                SplashWindow.logoImage.Opacity = 1.0;
-                SplashWindow.loadingProgress.Opacity = 1.0;
-                SplashWindow.progressRect.Opacity = 1.0;
-                SplashWindow.logoImage.BeginAnimation( OpacityProperty, null );
-            } );
-
-            SplashWindow.logoImage.BeginAnimation( OpacityProperty, animation );
-            }
-
 
         void checkLoadingStatusWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
             {
@@ -154,11 +117,6 @@ namespace AramisStarter
             checkLoadingStatusWorker.RunWorkerAsync();
             }
 
-        internal void HideWindow()
-            {
-            this.Dispatcher.Invoke( new Action( () => this.Hide() ) );
-            }
-
         private void Button_Click_1( object sender, RoutedEventArgs e )
             {
             SolutionUpdater.ResetVersion();
@@ -174,5 +132,65 @@ namespace AramisStarter
             LoginWindow.Window.Close();
             }
 
+        #endregion
+
+        #region public
+
+        internal void HideWindow()
+            {
+            SetNewVersionDownloadingStatus( false );
+            this.Dispatcher.Invoke( new Action( () => this.Hide() ) );
+            }
+
+        internal static Splash SplashWindow
+            {
+            get
+                {
+                lock ( getFormLocker )
+                    {
+                    if ( splashWindow == null )
+                        {
+                        splashWindow = new Splash();
+                        }
+                    }
+                return splashWindow;
+                }
+            }
+
+        internal void SetProgress( int progressValue )
+            {
+            int currentValue = ( int )SplashWindow.loadingProgress.Value;
+            if ( currentValue != progressValue )
+                {
+                SplashWindow.loadingProgress.Value = progressValue;
+                }
+            }
+
+        internal void ShowSlowly()
+            {
+            SplashWindow.logoImage.Opacity = 0;
+            SplashWindow.loadingProgress.Opacity = 0;
+            SplashWindow.progressRect.Opacity = 0;
+
+            splashWindow.Show();
+
+            DoubleAnimation animation = new DoubleAnimation { To = 1, Duration = TimeSpan.FromMilliseconds( 1800 ) };
+            animation.Completed += new EventHandler( ( senderA, eA ) =>
+            {
+                SplashWindow.logoImage.Opacity = 1.0;
+                SplashWindow.loadingProgress.Opacity = 1.0;
+                SplashWindow.progressRect.Opacity = 1.0;
+                SplashWindow.logoImage.BeginAnimation( OpacityProperty, null );
+            } );
+
+            SplashWindow.logoImage.BeginAnimation( OpacityProperty, animation );
+            }
+
+        internal static void SetNewVersionDownloadingStatus( bool isUpdateDownloadingNow )
+            {            
+            SplashWindow.Dispatcher.Invoke( new Action( () => splashWindow.newVersionDownloadingNotifying.Visibility = isUpdateDownloadingNow ? Visibility.Visible : Visibility.Hidden ) );
+            }
+
+        #endregion
         }
     }

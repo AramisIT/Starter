@@ -204,6 +204,12 @@ namespace AramisStarter
                 {
                 solutionDomain.ExecuteAssembly( solutionExecutiveFileName );
                 }
+            catch ( ThreadAbortException abortExp )
+                {
+                App.Stop();
+                return false;
+                }
+
             catch ( Exception exp )
                 {
                 executionError = string.Format( "ExecuteAssembly error: {0}", exp.Message );
@@ -290,7 +296,7 @@ namespace AramisStarter
 
                     if ( exitForUpdate )
                         {
-                        SolutionUpdater.MakeToUpdate( forsedUpdate );                        
+                        SolutionUpdater.MakeToUpdate( forsedUpdate );
                         }
                     }
                 else

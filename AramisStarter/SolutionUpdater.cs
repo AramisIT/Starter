@@ -400,9 +400,14 @@ namespace AramisStarter
                 ReadUpdateNumber();
                 if ( SolutionUpdateExists() )
                     {
+                    if ( !readyToRun )
+                        {
+                        Splash.SetNewVersionDownloadingStatus( true );
+                        }
+
                     bool newUpdatesDownloaded = DownLoadSolutionUpdate();
                     if ( newUpdatesDownloaded )
-                        {
+                        {                        
                         Starter.SetUpdateExistingStatus( true, accessibleUpdateNumber );
                         }
                     return newUpdatesDownloaded;

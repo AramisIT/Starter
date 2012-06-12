@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
          Height="378" Width="602"  ResizeMode="NoResize" Background="#0000"  WindowStartupLocation="CenterScreen"  WindowStyle="None" AllowsTransparency="True" ShowInTaskbar="False"  >
     <Canvas Loaded="Grid_Loaded_1">
-        <Image x:Name="logoImage" Loaded="logoImage_Loaded"></Image>
+        <Image x:Name="logoImage" Loaded="logoImage_Loaded"/>
+        <!--<Image x:Name="logoImage" Loaded="logoImage_Loaded" Source="..\Resources\logo.png"/>-->
         <Rectangle Fill="#FFFF" Width="604" Height="148" Canvas.Left="0" Canvas.Top="134" x:Name="progressRect" Panel.ZIndex="-1000"></Rectangle>
         <ProgressBar Panel.ZIndex="-100" Height="148" Canvas.Top="134" Canvas.Left="-1" Width="602" Value="50" Background="{x:Null}" BorderThickness="0" RenderTransformOrigin="1.596,-1.826"  x:Name="loadingProgress" Maximum="1000">
             <ProgressBar.BorderBrush>
@@ -16,6 +17,7 @@
         <Button Content="Start solution" Height="25" Canvas.Left="26" Canvas.Top="10" Width="114" Click="Button_Click_2" Visibility="Hidden"/>
         <Button Content="Reset Version" Height="25" Canvas.Left="163" Canvas.Top="10" Width="114" Click="Button_Click_1"  Visibility="Hidden"/>
         <Button Content="Exit" Height="25" Canvas.Left="302" Canvas.Top="10" Width="114" Click="Button_Click_3"  Visibility="Hidden"/>
+        <Label Visibility="Hidden" x:Name="newVersionDownloadingNotifying" Content="загрузка новой версии" Height="34" Canvas.Left="16" Canvas.Top="192" Width="275" FontWeight="Bold" FontFamily="Arial" FontSize="13" Foreground="#FF1564B0" FontStyle="Italic"/>
 
 
     </Canvas>
