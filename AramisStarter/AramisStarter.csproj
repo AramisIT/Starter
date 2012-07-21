@@ -90,6 +90,7 @@
       <DependentUpon>Splash.xaml</DependentUpon>
     </Compile>
     <Compile Include="SolutionUpdater.cs" />
+    <Compile Include="Utils\ErrorsNotifier.cs" />
     <Compile Include="Utils\RegistryHelper.cs" />
     <Compile Include="Utils\SyncHelper.cs" />
     <Compile Include="VistaGlassHelper.cs" />

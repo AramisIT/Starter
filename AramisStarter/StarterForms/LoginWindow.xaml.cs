@@ -211,14 +211,22 @@ namespace AramisStarter
 
         private void SaveAuthorization()
             {
-            Authorization.SaveLastLogin( UserName );
-            if ( SavePassword )
+            try
                 {
-                Authorization.SaveQuickStart( UserName, UserPassword );
+                Authorization.SaveLastLogin( UserName );
+                if ( SavePassword )
+                    {
+                    Authorization.SaveQuickStart( UserName, UserPassword );
+                    }
+                else
+                    {
+                    Authorization.EraseQuickStartData( UserName );
+                    }
                 }
-            else
+            catch ( Exception exp )
                 {
-                Authorization.EraseQuickStartData( UserName );
+                string errorMessage = string.Format("Ошибка сохранения данных авторизации: {0}", exp.Message);
+                errorMessage.ShowError();
                 }
             }
 

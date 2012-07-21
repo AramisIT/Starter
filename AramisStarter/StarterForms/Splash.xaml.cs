@@ -187,8 +187,8 @@ namespace AramisStarter
             }
 
         internal static void SetNewVersionDownloadingStatus( bool isUpdateDownloadingNow )
-            {            
-            SplashWindow.Dispatcher.Invoke( new Action( () => splashWindow.newVersionDownloadingNotifying.Visibility = isUpdateDownloadingNow ? Visibility.Visible : Visibility.Hidden ) );
+            {  
+            System.Windows.Application.Current.Dispatcher.Invoke( new Action( () => SplashWindow.newVersionDownloadingNotifying.Visibility = isUpdateDownloadingNow ? Visibility.Visible : Visibility.Hidden ) );
             }
 
         #endregion
