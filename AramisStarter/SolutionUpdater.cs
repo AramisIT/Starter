@@ -454,6 +454,8 @@ namespace AramisStarter
 
         private bool DownloadUpdateFiles( long totalBytes )
             {
+            RemoveFilesSchema();
+
             string queryText = string.Format( "select f.UpdateFile FileData, f.RowId Id from {0}Update f join @FilesId ids on ids.FileId = f.RowId order by f.RowId",
                 App.SelectedSolution.SolutionName );
             //App.SelectedSolution.SqlBaseName);
@@ -515,6 +517,11 @@ namespace AramisStarter
                 }
 
             return allFilesDownloaded;
+            }
+
+        private void RemoveFilesSchema()
+            {
+            DeleteFile( downloadsSchemaPath );
             }
 
         private bool WriteFilesSchema()
