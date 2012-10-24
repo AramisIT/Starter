@@ -121,7 +121,7 @@ namespace AramisStarter
         /// Пусть к xml-файлу со списком доступных решений
         /// </summary>
         private string solutionsPath;
-
+       
         private static void InitWithSelectedSolution()
             {
             SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}.{2}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ),
@@ -162,6 +162,22 @@ namespace AramisStarter
 
         public void Start( string[] args )
             {
+
+            if ( ProcessHelper.GetOtherSameProcessesList( true ).Count > 0 )
+                {
+                if ( MessageBox.Show( "Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены", "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No ) == MessageBoxResult.Yes )
+                    {
+                    ProcessHelper.GetOtherSameProcessesList( true ).ForEach( process => process.Kill() );
+                    }
+                else
+                    {
+                    return;
+                    }
+                }
+            
+
+            Log.testing = ( new List<string>() { "db", "atos", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
+
             if ( Thread.CurrentThread.Name == null )
                 {
                 Thread.CurrentThread.Name = "Main starter thread";
@@ -201,6 +217,12 @@ namespace AramisStarter
             if ( SelectedSolution != null )
                 {
                 InitWithSelectedSolution();
+               
+                if ( Log.testing )
+                    {
+                    ( new Log() ).Show();
+                    }
+
                 Run( mainWindow );
                 }
             }
@@ -208,7 +230,11 @@ namespace AramisStarter
         internal static void Stop()
             {
             SolutionUpdater.Stop();
-            LoginWindow.Window.Dispatcher.Invoke( new Action( () => LoginWindow.Window.Close() ) );
+            LoginWindow.Window.Dispatcher.Invoke( new Action( () =>
+                {
+                    Log.CloseWindow();
+                    LoginWindow.Window.Close();
+                } ) );
             }
 
         #endregion

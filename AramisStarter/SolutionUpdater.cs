@@ -67,41 +67,7 @@ namespace AramisStarter
         private static object locker = new object();
 
         private Thread updaterThread;
-
-        private static List<Process> GetOtherSameProcessesList( bool forCurrentWinUserOnly = false )
-            {
-            Process currentProcess = Process.GetCurrentProcess();
-            string currentProcessName = currentProcess.ProcessName;
-            int currentProcessID = currentProcess.Id;
-            string currentUserSID = System.Security.Principal.WindowsIdentity.GetCurrent().User.Value;
-            bool returnAllSameProcess = !forCurrentWinUserOnly;
-
-            return (
-                from process in Process.GetProcessesByName( currentProcessName )
-                where ( ( returnAllSameProcess || GetUserSIDByProcessID( process.Id ) == currentUserSID ) ) && ( process.Id != currentProcessID )
-                select process ).ToList<Process>();
-            }
-
-        private static string GetUserSIDByProcessID( int processID )
-            {
-            System.Management.ObjectQuery sq = new System.Management.ObjectQuery( string.Format( "Select * from Win32_Process Where ProcessID = '{0}'", processID ) );
-            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher( sq );
-            if ( searcher.Get().Count == 0 )
-                {
-                return string.Empty;
-                }
-            else
-                {
-                foreach ( System.Management.ManagementObject searchResult in searcher.Get() )
-                    {
-                    string[] sid = new String[ 1 ];
-                    searchResult.InvokeMethod( "GetOwnerSid", ( object[] )sid );
-                    return sid[ 0 ];
-                    }
-                return string.Empty;
-                }
-            }
-
+        
         private SolutionUpdater()
             {
             updaterThread = new Thread( UpdaterThread_DoWork );
@@ -110,13 +76,18 @@ namespace AramisStarter
 
         private bool TryToUpdateFiles()
             {
+            Log.Append( "TryToUpdateFiles() - enter" );
             if ( !File.Exists( downloadsSchemaPath ) )
                 {
                 Starter.SetUpdateExistingStatus( false );
+                Log.Append( "if ( !File.Exists( downloadsSchemaPath ) )" );
                 return true;
                 }
 
-            if ( !Starter.SolutionExecuting && SyncHelper.EnterMutex( Starter.RunSolutionMutex, TRY_TO_UPDATE_FILES_TIME_OUT ) )
+            bool possibilityToChangeFilesToNewVersion = !Starter.SolutionExecuting && SyncHelper.EnterMutex( Starter.RunSolutionMutex, TRY_TO_UPDATE_FILES_TIME_OUT );
+            Log.Append( "possibilityToChangeFilesToNewVersion = " + possibilityToChangeFilesToNewVersion.ToString() );
+            
+            if ( possibilityToChangeFilesToNewVersion )
                 {
                 bool filesUpdated = UpdateFiles();
 
@@ -133,16 +104,22 @@ namespace AramisStarter
 
         private bool UpdateFiles()
             {
+            Log.Append( "UpdateFiles() - enter" );
+
             if ( Starter.SolutionExecuting )
                 {
+                Log.Append( "if ( Starter.SolutionExecuting ) return false;" );
                 return false;
                 }
 
             List<Process> anotherProcesses = GetAnotherProcesses();
+            Log.Append( "anotherProcesses = GetAnotherProcesses();" );
             if ( anotherProcesses.Count > 0 )
                 {
+                Log.Append( "anotherProcesses.Count > 0" );
                 if ( waitForOtherProcessesComplated && !MaxTimeForSolutionExitExeeded() )
                     {
+                    Log.Append( "waitForOtherProcessesComplated && !MaxTimeForSolutionExitExeeded()" );
                     return false;
                     }
 
@@ -152,7 +129,16 @@ namespace AramisStarter
                     } );
                 }
 
-            return UseDownloadedFiles();
+            Log.Append( "before bool downloadedFilesUsed = UseDownloadedFiles();" );
+            bool downloadedFilesUsed = UseDownloadedFiles();
+
+            if ( !readyToRun )
+                {
+                Log.Append( "UpdateFiles() - exit; downloadedFilesUsed = " + downloadedFilesUsed.ToString() );
+                }
+
+            Log.Append( "UpdateFiles() exit downloadedFilesUsed = " + downloadedFilesUsed.ToString() );
+            return downloadedFilesUsed;
             }
 
         private bool MaxTimeForSolutionExitExeeded()
@@ -181,10 +167,10 @@ namespace AramisStarter
         private List<Process> GetAnotherProcesses()
             {
             SortedDictionary<int, Process> currentUserRealProcesses = new SortedDictionary<int, Process>();
-            GetOtherSameProcessesList( true ).ForEach( process => currentUserRealProcesses.Add( process.Id, process ) );
+            ProcessHelper.GetOtherSameProcessesList( true ).ForEach( process => currentUserRealProcesses.Add( process.Id, process ) );
 
             SortedDictionary<int, Process> allRealProcesses = new SortedDictionary<int, Process>();
-            GetOtherSameProcessesList().ForEach( process => allRealProcesses.Add( process.Id, process ) );
+            ProcessHelper.GetOtherSameProcessesList().ForEach( process => allRealProcesses.Add( process.Id, process ) );
 
             List<Process> currentSQLBaseExistinsProcess = GetCurrentSQLBaseExistinsProcess( currentUserRealProcesses, allRealProcesses );
             return currentSQLBaseExistinsProcess;
@@ -273,15 +259,20 @@ namespace AramisStarter
         /// </summary>
         private bool UseDownloadedFiles()
             {
+            Log.Append( "UseDownloadedFiles() - enter" );
+
             int version;
             Dictionary<string, string> filesInfo = ReadUpdateFilesInfo( out version );
+            Log.Append( "Dictionary<string, string> filesInfo = ReadUpdateFilesInfo( out version );" );
             if ( version <= currentVersion )
                 {
+                Log.Append( " if ( version <= currentVersion ) return true;" );
                 return true;
                 }
 
             if ( filesInfo == null )
                 {
+                Log.Append( " if ( filesInfo == null ) return false;" );
                 return false;
                 }
 
@@ -289,12 +280,17 @@ namespace AramisStarter
                 {
                 if ( !AcceptDownLoadedFile( GetTemporaryFilePath( idPathPair.Key ), App.SolutionDirPath + idPathPair.Value ) )
                     {
+                    Log.Append( string.Format( "Can't accept downloadedFile: [{0}]", idPathPair.Value ) );
                     return false;
                     }
                 }
 
             ClearUpdateFolder();
-            return WriteCurrentUpdateVersion( version );
+
+            bool result = WriteCurrentUpdateVersion( version );
+            Log.Append( string.Format( "UseDownloadedFiles() - exit; WriteCurrentUpdateVersion( version ) = {0}; version = {1}", result, version ) );
+
+            return result;
             }
 
         private static bool WriteCurrentUpdateVersion( int version )
@@ -407,8 +403,9 @@ namespace AramisStarter
 
                     bool newUpdatesDownloaded = DownLoadSolutionUpdate();
                     if ( newUpdatesDownloaded )
-                        {                        
+                        {
                         Starter.SetUpdateExistingStatus( true, accessibleUpdateNumber );
+                        Log.Append( "newUpdatesDownloaded" );
                         }
                     return newUpdatesDownloaded;
                     }
@@ -828,6 +825,12 @@ namespace AramisStarter
         private static int currentVersion;
         private SortedDictionary<Guid, DownloadFileInfo> filesToUpdate = new SortedDictionary<Guid, DownloadFileInfo>();
         private SortedDictionary<Guid, DownloadFileInfo> filesToDownLoad = new SortedDictionary<Guid, DownloadFileInfo>();
+ 
+        private volatile bool stopWork = false;
+        private const int MAX_TIME_FOR_SOLUTION_EXIT_SEC = 25;
+        private static readonly DateTime EMPTY_TIME = new DateTime( 1, 1, 1 );
+        private DateTime startForsedUpdateTime = EMPTY_TIME;
+        private int totalSec;
 
         private static string updateTemporaryFolderPathValue;
 
@@ -946,8 +949,11 @@ namespace AramisStarter
 
         private void TryToPerformUpdating()
             {
+            Log.Append( "TryToPerformUpdating() enter" );
+
             if ( !TryToDownLoadUpdate() )
                 {
+                Log.Append( " if ( !TryToDownLoadUpdate() ) return;" );
                 return;
                 }
 
@@ -957,11 +963,14 @@ namespace AramisStarter
                 Starter.SetUpdateExistingStatus( false );
                 }
 
-            if ( filesUpdated && !readyToRun )
+            if ( filesUpdated && !readyToRun && currentVersion > 0 )
                 {
                 downloadingComplateProgress = 1000;
+                Log.Append( "readyToRun = true;" );
                 readyToRun = true;
                 }
+
+            Log.Append( "TryToPerformUpdating() exit" );
             }
 
         private void UpdaterThread_DoWork()
@@ -973,22 +982,36 @@ namespace AramisStarter
 
             while ( !stopWork )
                 {
+
+                Log.Append( "while ( !stopWork )" );
+
                 if ( SyncHelper.EnterMutex( TryToUpdateAramisSolution, 1000 ) )
                     {
+                    Log.Append( "if SyncHelper.EnterMutex( TryToUpdateAramisSolution, 1000 )" );
+
                     TryToPerformUpdating();
+                    Log.Append( "TryToPerformUpdating();" );
 
                     SyncHelper.ExitMutex( TryToUpdateAramisSolution );
+                    Log.Append( "SyncHelper.ExitMutex( TryToUpdateAramisSolution );" );
                     }
 
                 if ( timeToCheckForStarterUpdate )
                     {
+                    Log.Append( "if ( timeToCheckForStarterUpdate )" );
+                    
                     TryToUpdateStarter();
+                    Log.Append( "after TryToUpdateStarter();" );
                     }
 
+                Log.Append( "before UpdaterThread_DoWork Sleep();" );
                 Sleep();
+                Log.Append( "after UpdaterThread_DoWork Sleep();" );
                 }
-            }
 
+            Log.Append( "UpdaterThread_DoWork() - exit" );
+            }
+ 
         #endregion
 
         #region public
@@ -1035,11 +1058,7 @@ namespace AramisStarter
                 }
             }
 
-        private volatile bool stopWork = false;
-        private const int MAX_TIME_FOR_SOLUTION_EXIT_SEC = 25;
-        private static readonly DateTime EMPTY_TIME = new DateTime( 1, 1, 1 );
-        private DateTime startForsedUpdateTime = EMPTY_TIME;
-        private int totalSec;
+      
 
         internal static void Init()
             {
@@ -1061,6 +1080,7 @@ namespace AramisStarter
             }
         internal static void MakeToUpdate( bool forsedUpdate )
             {
+            Log.Append( "readyToRun = false;" );
             updater.readyToRun = false;
             updater.waitForOtherProcessesComplated = forsedUpdate;
             }

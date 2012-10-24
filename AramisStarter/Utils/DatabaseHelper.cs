@@ -50,7 +50,7 @@ namespace AramisStarter.Utils
 
         internal static SqlConnection GetUpdateConnection()
             {
-            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, "AramisUpdate" ) );
+            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, "AramisUpdate" ) );// "UTKDevelopUpdate") );
             }
 
         internal static bool CheckPassword( string userId, SecureString securePassword )
@@ -122,7 +122,7 @@ select 1 ok;
 ";
             #endregion
 
-            SqlConnection conn = GetGuestConnection();           
+            SqlConnection conn = GetGuestConnection();
 
             try
                 {

@@ -31,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -60,6 +60,9 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="DownloadFileInfo.cs" />
+    <Compile Include="Log.xaml.cs">
+      <DependentUpon>Log.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Authorization.cs" />
     <Compile Include="Utils\Encryptor.cs" />
     <Compile Include="HashGenerator.cs" />
@@ -91,6 +94,7 @@
     </Compile>
     <Compile Include="SolutionUpdater.cs" />
     <Compile Include="Utils\ErrorsNotifier.cs" />
+    <Compile Include="Utils\ProcessHelper.cs" />
     <Compile Include="Utils\RegistryHelper.cs" />
     <Compile Include="Utils\SyncHelper.cs" />
     <Compile Include="VistaGlassHelper.cs" />
@@ -109,6 +113,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Log.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="StarterForms\AddNewSystemWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

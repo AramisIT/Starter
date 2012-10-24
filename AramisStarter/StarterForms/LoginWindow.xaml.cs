@@ -46,7 +46,7 @@ namespace AramisStarter
 
         private void UseAlternativeStyle()
             {
-            backGroungImage.Source = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.BBB );
+            //backGroungImage.Source = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.BBB );
             //ImageSource imgSource = new ImageSource();
             //this.Background = new ImageBrush(imgSource);
             backGroungImage.Visibility = System.Windows.Visibility.Visible;

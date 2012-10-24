@@ -203,15 +203,18 @@ namespace AramisStarter
             try
                 {
                 solutionDomain.ExecuteAssembly( solutionExecutiveFileName );
+                Log.Append( "Executed - OK" );
                 }
             catch ( ThreadAbortException abortExp )
                 {
+                Log.Append( "Executing ThreadAbortException - " + abortExp.Message );
                 App.Stop();
                 return false;
                 }
 
             catch ( Exception exp )
                 {
+                Log.Append( "Executing exception - " + exp.Message );
                 executionError = string.Format( "ExecuteAssembly error: {0}", exp.Message );
                 Trace.WriteLine( executionError );
 
@@ -236,10 +239,13 @@ namespace AramisStarter
 
             try
                 {
+                Log.Append( "before domain unload" );
                 AppDomain.Unload( solutionDomain );
+                Log.Append( "domain unloaded" );
                 }
             catch
                 {
+                Log.Append( "error domain unloaded" );
                 return false;
                 }
 
@@ -248,10 +254,11 @@ namespace AramisStarter
             GC.WaitForPendingFinalizers();
 
             RegistrateSolutionExit();
+            Log.Append( "RegistrateSolutionExit() solutionExecuting = " + solutionExecuting.ToString() );
 
             exitForUpdate = ( exitForUpdateObj != null ) && ( exitForUpdateObj is bool ) && ( bool )exitForUpdateObj;
             forsedUpdate = ( forsedUpdateObj != null ) && ( forsedUpdateObj is bool ) && ( bool )forsedUpdateObj;
-
+            Log.Append( "exit ExecuteSolution" );
             return true;
             }
 
