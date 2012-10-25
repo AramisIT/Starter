@@ -453,7 +453,7 @@ namespace AramisStarter
             {
             RemoveFilesSchema();
 
-            string queryText = string.Format( "select f.UpdateFile FileData, f.RowId Id from {0}Update f join @FilesId ids on ids.FileId = f.RowId order by f.RowId",
+            string queryText = string.Format( "select f.RowId Id, f.UpdateFile FileData from {0}Update f join @FilesId ids on ids.FileId = f.RowId order by f.RowId",
                 App.SelectedSolution.SolutionName );
             //App.SelectedSolution.SqlBaseName);
 
@@ -474,7 +474,7 @@ namespace AramisStarter
                         tableParameter.SqlDbType = SqlDbType.Structured;
                         tableParameter.TypeName = "tvp_FilesToDownload";
 
-                        using ( SqlDataReader dataReader = cmd.ExecuteReader() )
+                        using ( SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.SequentialAccess) )
                             {
                             while ( dataReader.Read() )
                                 {
@@ -563,14 +563,16 @@ namespace AramisStarter
                     {
                     while ( readerPosition < fileSize )
                         {
-                        bytesReaded = ( int )dataReader.GetBytes( 0, readerPosition, readBuffer, 0, BUFFER_SIZE );
+                        bytesReaded = ( int )dataReader.GetBytes(1, readerPosition, readBuffer, 0, BUFFER_SIZE );
                         file.Write( readBuffer, 0, bytesReaded );
 
                         readerPosition += bytesReaded;
                         }
                     }
-                catch
+                catch (Exception exp)
                     {
+                    Trace.WriteLine( String.Format( "Ошибка записи файла: {0}", exp.Message ) );
+
                     file.Close();
 
                     DeleteFile( filePath );
