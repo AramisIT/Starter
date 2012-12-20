@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 
-namespace AramisStarter
+namespace AramisStarter.Utils
     {
     class HashGenerator
         {

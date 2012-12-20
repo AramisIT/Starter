@@ -14,9 +14,12 @@ using System.Xml.Linq;
 using AramisStarter.Utils;
 using Microsoft.Win32;
 
-namespace AramisStarter
+namespace AramisStarter.FilesDownloading
     {
-    class SolutionUpdater
+    /// <summary>
+    /// Обеспечивает механизм загрузки новых файлов из БД и применения этих файлов: удаления старых, перемещения новых
+    /// </summary>
+    internal class SolutionUpdater
         {
         #region private
 
@@ -67,7 +70,7 @@ namespace AramisStarter
         private static object locker = new object();
 
         private Thread updaterThread;
-        
+
         private SolutionUpdater()
             {
             updaterThread = new Thread( UpdaterThread_DoWork );
@@ -86,7 +89,7 @@ namespace AramisStarter
 
             bool possibilityToChangeFilesToNewVersion = !Starter.SolutionExecuting && SyncHelper.EnterMutex( Starter.RunSolutionMutex, TRY_TO_UPDATE_FILES_TIME_OUT );
             Log.Append( "possibilityToChangeFilesToNewVersion = " + possibilityToChangeFilesToNewVersion.ToString() );
-            
+
             if ( possibilityToChangeFilesToNewVersion )
                 {
                 bool filesUpdated = UpdateFiles();
@@ -474,7 +477,7 @@ namespace AramisStarter
                         tableParameter.SqlDbType = SqlDbType.Structured;
                         tableParameter.TypeName = "tvp_FilesToDownload";
 
-                        using ( SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.SequentialAccess) )
+                        using ( SqlDataReader dataReader = cmd.ExecuteReader( CommandBehavior.SequentialAccess ) )
                             {
                             while ( dataReader.Read() )
                                 {
@@ -563,13 +566,13 @@ namespace AramisStarter
                     {
                     while ( readerPosition < fileSize )
                         {
-                        bytesReaded = ( int )dataReader.GetBytes(1, readerPosition, readBuffer, 0, BUFFER_SIZE );
+                        bytesReaded = ( int )dataReader.GetBytes( 1, readerPosition, readBuffer, 0, BUFFER_SIZE );
                         file.Write( readBuffer, 0, bytesReaded );
 
                         readerPosition += bytesReaded;
                         }
                     }
-                catch (Exception exp)
+                catch ( Exception exp )
                     {
                     Trace.WriteLine( String.Format( "Ошибка записи файла: {0}", exp.Message ) );
 
@@ -827,7 +830,7 @@ namespace AramisStarter
         private static int currentVersion;
         private SortedDictionary<Guid, DownloadFileInfo> filesToUpdate = new SortedDictionary<Guid, DownloadFileInfo>();
         private SortedDictionary<Guid, DownloadFileInfo> filesToDownLoad = new SortedDictionary<Guid, DownloadFileInfo>();
- 
+
         private volatile bool stopWork = false;
         private const int MAX_TIME_FOR_SOLUTION_EXIT_SEC = 25;
         private static readonly DateTime EMPTY_TIME = new DateTime( 1, 1, 1 );
@@ -1001,7 +1004,7 @@ namespace AramisStarter
                 if ( timeToCheckForStarterUpdate )
                     {
                     Log.Append( "if ( timeToCheckForStarterUpdate )" );
-                    
+
                     TryToUpdateStarter();
                     Log.Append( "after TryToUpdateStarter();" );
                     }
@@ -1013,7 +1016,7 @@ namespace AramisStarter
 
             Log.Append( "UpdaterThread_DoWork() - exit" );
             }
- 
+
         #endregion
 
         #region public
@@ -1060,7 +1063,7 @@ namespace AramisStarter
                 }
             }
 
-      
+
 
         internal static void Init()
             {

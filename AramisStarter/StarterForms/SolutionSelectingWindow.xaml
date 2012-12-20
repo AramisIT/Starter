@@ -1,0 +1,151 @@
+﻿<Window x:Class="AramisStarter.SolutionSelectingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+        Title="Выбор системы для запуска" Height="238" Width="395" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="Transparent" Loaded="Window_Loaded">
+    <Window.Resources>
+
+        <DataTemplate x:Key="SelectingSolution">
+            <TextBlock Text="{Binding Path=SolutionFriendlyName}" MouseDown="TextBlock_MouseDown_1" FontWeight="Medium" FontSize="20"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EditSolutionsList">
+            <Grid Background="White" Height="25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Image Width="16" Height="16" Source="../Images/DeepBlue_16x16.png" Opacity="0" x:Name="image"/>
+                <TextBox Grid.Column="1" Text="{Binding Path=SolutionFriendlyName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         MouseDown="TextBlock_MouseDown_1" FontWeight="Medium" FontSize="18" HorizontalAlignment="Stretch"
+                         BorderThickness="0"     
+                         PreviewDrop="ItemDrop" 
+                         PreviewDragOver="TextBoxItemDragEnter" 
+                         PreviewDragEnter="TextBoxItemDragEnter"
+                         />
+                <Button Grid.Column="2" Height="16" Width="16" Click="RemoveButton_Click" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage" Focusable="True"/>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage"/>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseOver.png"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseDown.png"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </DataTemplate>
+        <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter"/>
+    </Window.Resources>
+    <!--Background="#699F"-->
+    <Grid  ShowGridLines="False" Visibility="Visible">
+        <Grid.Background>
+            <SolidColorBrush Color="#0000"/>
+            <!--<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                <GradientStop Offset="0" Color="#6000"></GradientStop>
+                <GradientStop Offset="0.2" Color="#688F"></GradientStop>
+                <GradientStop Offset="0.3" Color="#688F"></GradientStop>
+                <GradientStop Offset="0.5" Color="#688F"></GradientStop>
+                <GradientStop Offset="0.6" Color="#688F"></GradientStop>
+                <GradientStop Offset="0.8" Color="#6000"></GradientStop>
+            </LinearGradientBrush>-->
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="1" MaxHeight="25" MaxWidth="220" FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Click="GoButton_Click" Margin="0,0,0,0" x:Name="goButton"
+                xmlns:solutionSelecting="clr-namespace:AramisStarter.SolutionSelecting" solutionSelecting:KeyStateChecker.CheckingKey="LeftCtrl" 
+                solutionSelecting:KeyStateChecker.AlternativeCheckingKey="RightCtrl" BorderThickness="0">
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Content" Value="Запуск"/>
+                    <Setter Property="solutionSelecting:KeyStateChecker.AlternativeContent" Value="ОК"/>
+                    <Style.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="solutionSelecting:KeyStateChecker.IsKeyPressed" Value="true"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="solutionSelecting:KeyStateChecker.IsKeyPressed" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.Setters>
+                                <Setter Property="Content" Value="Изменить список решений"/>
+                            </MultiTrigger.Setters>
+
+                        </MultiTrigger>
+                        <Trigger Property="solutionSelecting:KeyStateChecker.OkMode" Value="True">
+                            <Setter Property="Content" Value="{Binding (solutionSelecting:KeyStateChecker.AlternativeContent),RelativeSource={RelativeSource Self}}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,0">
+            <StackPanel.Visibility>
+                <Binding Path="IsEditListMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Converter="{StaticResource booleanToVisibilityConverter}"/>
+            </StackPanel.Visibility>
+            <Button Grid.Row="1" Height="25" Width="25"  FontWeight="Bold" FontFamily="Calibri" FontSize="16" RenderTransformOrigin="0.619,0.583" Margin="0,0,0,0" Content="+" Click="AddButton_Click"/>
+
+        </StackPanel>
+
+        <TextBlock FontSize="25" Foreground="#ffff6f7d" Visibility="Hidden" Grid.ColumnSpan="2" Grid.Row="4" x:Name="myMessage" MinHeight="0" Text="Неверный пароль" TextWrapping="Wrap" TextAlignment="Center" >
+            <TextBlock.Effect>
+                <DropShadowEffect Color="Black" ShadowDepth="2" BlurRadius="4"></DropShadowEffect>
+            </TextBlock.Effect>
+        </TextBlock>
+        <ListBox HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" x:Name="listBox" ItemTemplate="{StaticResource ResourceKey=SelectingSolution}">
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="AllowDrop" Value="True"/>
+                    <EventSetter Event="MouseEnter" Handler="ListBoxItemMouseEnter"/>
+                    <EventSetter Event="MouseLeave" Handler="ListBoxItemMouseLeave"/>
+                    <EventSetter Event="PreviewMouseDown" Handler="BeginSelectByDown"/>
+                    <EventSetter Event="PreviewDrop" Handler="ItemDrop"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <EventSetter Event="PreviewGotKeyboardFocus" Handler="SelectCurrentItem"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <!--<Setter Property="Background" Value="LightGray"/>-->
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                <Border x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+
+                                    <Trigger Property="IsSelected" Value="true">
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Background" TargetName="Bd" Value="#3399ff"/>
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsSelected" Value="true"/>
+                                            <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background" TargetName="Bd" Value="#3399ff"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </MultiTrigger>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.Resources>
+        </ListBox>
+
+    </Grid>
+
+</Window>

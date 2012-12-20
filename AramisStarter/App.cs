@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using System.Xml.Linq;
 using Aramis.NET;
+using AramisStarter.FilesDownloading;
 using AramisStarter.Utils;
 
 namespace AramisStarter
@@ -30,22 +33,27 @@ namespace AramisStarter
 
         private const string DEFAULT_SOLUTION = "DefaultSolution";
 
-        private List<SolutionInfo> solutions;
+        private ObservableCollection<SolutionInfo> solutions;
 
-        private void SaveSolutionsList()
+        internal static void SaveSolutionsList( ObservableCollection<SolutionInfo> solutions )
             {
+            if ( solutionsPath == null )
+                {
+                return;
+                }
+
             XElement doc = new XElement( ROOT_NODE_NAME );
             doc.SetAttributeValue( DEFAULT_SOLUTION, "" );
 
-            solutions.ForEach( solutionInfo =>
+            foreach ( SolutionInfo solutionInfo in solutions )
                 {
-                    XElement solutionXElement = new XElement( SOLUTION_NODE );
-                    solutionXElement.SetAttributeValue( NAME_ATTRIBUTE, solutionInfo.SolutionName );
-                    solutionXElement.Add( new XElement( SERVER_FRIENDLY_XML_NAME, solutionInfo.SolutionFriendlyName ) );
-                    solutionXElement.Add( new XElement( SQL_BASE_NAME_XML_NAME, solutionInfo.SqlBaseName ) );
-                    solutionXElement.Add( new XElement( SERVER_XML_NAME, solutionInfo.SqlServerName ) );
-                    doc.Add( solutionXElement );
-                } );
+                XElement solutionXElement = new XElement( SOLUTION_NODE );
+                solutionXElement.SetAttributeValue( NAME_ATTRIBUTE, solutionInfo.SolutionName );
+                solutionXElement.Add( new XElement( SERVER_FRIENDLY_XML_NAME, solutionInfo.SolutionFriendlyName ) );
+                solutionXElement.Add( new XElement( SQL_BASE_NAME_XML_NAME, solutionInfo.SqlBaseName ) );
+                solutionXElement.Add( new XElement( SERVER_XML_NAME, solutionInfo.SqlServerName ) );
+                doc.Add( solutionXElement );
+                }
 
             string directoryName = Path.GetDirectoryName( solutionsPath );
             try
@@ -66,7 +74,7 @@ namespace AramisStarter
             string xmlData = ReadSolutionsFromDisk();
             if ( xmlData == "" )
                 {
-                solutions = new List<SolutionInfo>();
+                solutions = new ObservableCollection<SolutionInfo>();
                 return;
                 }
 
@@ -91,11 +99,12 @@ namespace AramisStarter
                 newSolutionsList = new List<SolutionInfo>();
                 }
 
-            solutions = newSolutionsList;
-            solutions.Sort( ( solInfo1, solInfo2 ) =>
+            newSolutionsList.Sort( ( solInfo1, solInfo2 ) =>
                 {
                     return solInfo1.SolutionFriendlyName.CompareTo( solInfo2.SolutionFriendlyName );
                 } );
+
+            solutions = new ObservableCollection<SolutionInfo>( newSolutionsList );
             }
 
         private string ReadSolutionsFromDisk()
@@ -120,8 +129,8 @@ namespace AramisStarter
         /// <summary>
         /// Пусть к xml-файлу со списком доступных решений
         /// </summary>
-        private string solutionsPath;
-       
+        private static string solutionsPath;
+
         private static void InitWithSelectedSolution()
             {
             SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}.{2}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ),
@@ -157,7 +166,7 @@ namespace AramisStarter
         public App( string solutionsPath )
             : base()
             {
-            this.solutionsPath = solutionsPath;
+            App.solutionsPath = solutionsPath;
             }
 
         public void Start( string[] args )
@@ -174,7 +183,7 @@ namespace AramisStarter
                     return;
                     }
                 }
-            
+
 
             Log.testing = ( new List<string>() { "db", "atos", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
 
@@ -184,18 +193,17 @@ namespace AramisStarter
                 }
 
             ReadSolutions();
-
+          //  ( new WpfApplication1.SolutionSelectingWindowXXX() ).ShowDialog();
             // Нужно что это окно было создано первым, т.к. оно будет главным
             LoginWindow mainWindow = LoginWindow.Window;
 
             if ( solutions.Count == 0 )
                 {
-                AddNewSystemWindow addNewSystemWindow = new AddNewSystemWindow();
-                addNewSystemWindow.ShowDialog();
-                if ( addNewSystemWindow.NewSolution != null )
+                SolutionInfo newSolutionInfo = AddNewSystemWindow.AddNewSolution();
+                if ( newSolutionInfo != null )
                     {
-                    solutions.Add( addNewSystemWindow.NewSolution );
-                    SaveSolutionsList();
+                    solutions.Add( newSolutionInfo );
+                    SaveSolutionsList( solutions );
                     }
                 }
 
@@ -203,21 +211,21 @@ namespace AramisStarter
 
             SelectedSolution = null;
 
-            if ( solutions.Count == 1 )
+            if ( solutions.Count == 1 && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
                 {
                 SelectedSolution = solutions[ 0 ];
                 }
-            else if ( solutions.Count > 1 )
+            else
                 {
-                //SelectSolutionWindow seleectingWindow = new SelectSolutionWindow( Solutions );
-                //selectedSolution.ShowDialog();
-                //selectedSolution = selectedSolution.SelectedSolution;
+                SolutionSelectingWindow seleectingWindow = new SolutionSelectingWindow( solutions );
+                seleectingWindow.ShowDialog();
+                SelectedSolution = seleectingWindow.SelectedSolution;
                 }
 
             if ( SelectedSolution != null )
                 {
                 InitWithSelectedSolution();
-               
+
                 if ( Log.testing )
                     {
                     ( new Log() ).Show();

@@ -273,10 +273,10 @@ select 1 ok;
 
             databases.ForEach( databaseName =>
                 {
-                    if ( ReadSolutionInfo( serverName, databaseName, out solutionInfo ) )
-                        {
-                        result.Add( solutionInfo );
-                        }
+                    //if ( ReadSolutionInfo( serverName, databaseName, out solutionInfo ) )
+                    //  {
+                    result.Add( new SolutionInfo() { SqlServerName = serverName, SqlBaseName = databaseName } );
+                    //  }
                 } );
 
             return result;
@@ -284,7 +284,7 @@ select 1 ok;
 
         #endregion
 
-        private static bool ReadSolutionInfo( string serverName, string databaseName, out SolutionInfo solutionInfo )
+        internal static bool ReadSolutionInfo( string serverName, string databaseName, out SolutionInfo solutionInfo )
             {
             string systemNameInfo = GetSolutionNameInfo( serverName, databaseName );
             if ( systemNameInfo == null )

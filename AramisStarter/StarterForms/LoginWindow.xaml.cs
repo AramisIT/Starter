@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AramisStarter.FilesDownloading;
 using AramisStarter.Utils;
 using Windows;
 
@@ -84,6 +84,7 @@ namespace AramisStarter
                     }
                 catch ( Exception exp )
                     {
+                    Trace.WriteLine(exp.Message);
                     ShowError( "Нет подключения" );
                     return;
                     }

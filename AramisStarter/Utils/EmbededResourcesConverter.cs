@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
-namespace AramisStarter
+namespace AramisStarter.Utils
     {
     static class EmbededResourcesConverter
         {

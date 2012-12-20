@@ -6,27 +6,27 @@ using System.Text;
 
 namespace AramisStarter
     {
-    class SolutionInfo
+    public class SolutionInfo
         {
-        internal string SqlServerName
+        public string SqlServerName
             {
             get;
             set;
             }
 
-        internal string SqlBaseName
+        public string SqlBaseName
             {
             get;
             set;
             }
 
-        internal string SolutionName
+        public string SolutionName
             {
             get;
             set;
             }
 
-        internal string SolutionFriendlyName
+        public string SolutionFriendlyName
             {
             get;
             set;

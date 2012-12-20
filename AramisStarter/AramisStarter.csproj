@@ -59,19 +59,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="DownloadFileInfo.cs" />
-    <Compile Include="Log.xaml.cs">
+    <Compile Include="FilesDownloading\DownloadFileInfo.cs" />
+    <Compile Include="SolutionSelecting\KeyStateChecker.cs" />
+    <Compile Include="StarterForms\SolutionSelectingWindow.xaml.cs">
+      <DependentUpon>SolutionSelectingWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StarterForms\Log.xaml.cs">
       <DependentUpon>Log.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Authorization.cs" />
     <Compile Include="Utils\Encryptor.cs" />
-    <Compile Include="HashGenerator.cs" />
+    <Compile Include="Utils\HashGenerator.cs" />
     <Compile Include="Starter.cs" />
     <Compile Include="StarterForms\AddNewSystemWindow.xaml.cs">
       <DependentUpon>AddNewSystemWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\DatabaseHelper.cs" />
-    <Compile Include="EmbededResourcesConverter.cs" />
+    <Compile Include="Utils\EmbededResourcesConverter.cs" />
     <Compile Include="StarterForms\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -88,16 +92,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="SolutionInfo.cs" />
+    <Compile Include="SolutionSelecting\SolutionInfo.cs" />
     <Compile Include="StarterForms\Splash.xaml.cs">
       <DependentUpon>Splash.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SolutionUpdater.cs" />
+    <Compile Include="FilesDownloading\SolutionUpdater.cs" />
     <Compile Include="Utils\ErrorsNotifier.cs" />
     <Compile Include="Utils\ProcessHelper.cs" />
     <Compile Include="Utils\RegistryHelper.cs" />
     <Compile Include="Utils\SyncHelper.cs" />
-    <Compile Include="VistaGlassHelper.cs" />
+    <Compile Include="Utils\VistaGlassHelper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -113,7 +117,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Log.xaml">
+    <Page Include="StarterForms\SolutionSelectingWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="StarterForms\Log.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -126,6 +134,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="StarterForms\Splash.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -147,6 +159,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\BBB.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\DeepBlue_16x16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\removeButtonMouseOver.png" />
+    <Resource Include="Images\removeButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\removeButtonMouseDown.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

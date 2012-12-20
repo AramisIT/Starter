@@ -59,10 +59,19 @@ namespace AramisStarter
                 }
 
             ComboBoxItem currentItem = databaseNameComboBox.SelectedItem as ComboBoxItem;
-            NewSolution = currentItem.Tag as SolutionInfo;           
-            Close();
+            SolutionInfo resultSolution = currentItem.Tag as SolutionInfo;
+            newSolution = resultSolution;
+            if ( DatabaseHelper.ReadSolutionInfo( resultSolution.SqlServerName, resultSolution.SqlBaseName, out resultSolution ) )
+                {              
+                Close();
+                }
+            else
+                {
+                ShowError( "Не удалось получить описание системы для этой базы данных." );
+                //  "Не удалось получить описание системы для этой базы данных.".ShowError();
+                }
             }
-        
+
         private void serverNameTextBox_LostFocus( object sender, RoutedEventArgs e )
             {
             FillDatabasesList();
@@ -110,11 +119,11 @@ namespace AramisStarter
                 databaseNameComboBox.Focus();
                 }
             }
-        
-        internal SolutionInfo NewSolution
+
+        private SolutionInfo newSolution
             {
             get;
-            private set;
+            set;
             }
 
         private void databaseNameComboBox_KeyDown( object sender, KeyEventArgs e )
@@ -137,12 +146,56 @@ namespace AramisStarter
             myMessage.Text = "";
             }
 
+        private SolutionInfo getCurrentSolutionInfo()
+            {
+            if ( databaseNameComboBox.SelectedItem != null )
+                {
+                return ( ( ComboBoxItem )databaseNameComboBox.SelectedItem ).Tag as SolutionInfo;
+                }
+            else
+                {
+                return null;
+                }
+            }
+
         private void databaseNameComboBox_SelectionChanged( object sender, SelectionChangedEventArgs e )
             {
-            if ( databaseNameComboBox.SelectedItem != null)
+            SolutionInfo currentSolutionInfo = getCurrentSolutionInfo();
+            if ( currentSolutionInfo != null )
                 {
-                SolutionInfo currentSolutionInfo = ( ( ComboBoxItem )databaseNameComboBox.SelectedItem ).Tag as SolutionInfo;
-                solutionNameTextBox.Text = currentSolutionInfo.SolutionName;
+                if ( currentSolutionInfo.SolutionName == null )
+                    {
+                    SolutionInfo newSolutionInfo;
+                    if ( DatabaseHelper.ReadSolutionInfo( currentSolutionInfo.SqlServerName, currentSolutionInfo.SqlBaseName, out newSolutionInfo ) )
+                        {
+                        currentSolutionInfo.SolutionFriendlyName = newSolutionInfo.SolutionFriendlyName;
+                        currentSolutionInfo.SolutionName = newSolutionInfo.SolutionName;
+                        solutionNameTextBox.IsReadOnly = false;
+                        }
+                    else
+                        {
+                        currentSolutionInfo.SolutionFriendlyName = "<система не обнаружена>";
+                        solutionNameTextBox.IsReadOnly = true;
+                        }
+                    }
+                solutionNameTextBox.Text = currentSolutionInfo.SolutionFriendlyName;
+                HideError();
+                }
+            }
+
+        internal static SolutionInfo AddNewSolution()
+            {
+            AddNewSystemWindow addNewSystemWindow = new AddNewSystemWindow();
+            addNewSystemWindow.ShowDialog();
+            return addNewSystemWindow.newSolution;
+            }
+
+        private void solutionNameTextBox_TextChanged( object sender, TextChangedEventArgs e )
+            {
+            SolutionInfo currentSolutionInfo = getCurrentSolutionInfo();
+            if ( currentSolutionInfo != null && !solutionNameTextBox.IsReadOnly )
+                {
+                currentSolutionInfo.SolutionFriendlyName = solutionNameTextBox.Text;
                 }
             }
         }

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aramis.NET", "Aramis.NET\Aramis.NET.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisStarter", "AramisStarter\AramisStarter.csproj", "{CE5A42C7-0052-42E3-8C73-0C710412925C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication1", "WpfApplication1\WpfApplication1.csproj", "{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,16 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A5E99338-0DFE-41D9-AC12-4C2F4AD3C322}.Release|x86.ActiveCfg = Release|Any CPU
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE5A42C7-0052-42E3-8C73-0C710412925C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

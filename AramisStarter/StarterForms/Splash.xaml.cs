@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using AramisStarter.FilesDownloading;
 using Windows;
 
 namespace AramisStarter
@@ -34,7 +34,7 @@ namespace AramisStarter
             {
             Owner = LoginWindow.Window;
             InitializeComponent();
-            logoImage.Source = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.LogoImage );
+            logoImage.Source = AramisStarter.Utils.EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.LogoImage );
             }
 
         private void Grid_Loaded_1( object sender, RoutedEventArgs e )
