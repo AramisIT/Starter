@@ -205,6 +205,11 @@ namespace AramisStarter
 
         private void BeginSelectByDown( object sender, MouseButtonEventArgs e )
             {
+            if ( !IsEditListMode )
+                {
+                return;
+                }
+
             if ( sender is ListBoxItem )
                 {
                 ( sender as ListBoxItem ).IsSelected = true;
@@ -241,7 +246,10 @@ namespace AramisStarter
 
         private void TextBlock_MouseDown_1( object sender, MouseButtonEventArgs e )
             {
-            BeginSelectByDown( sender, e );
+            if ( e.ClickCount > 1 )
+                {
+                SelectSolution();
+                }
             }
 
         private void Button_Click_1( object sender, RoutedEventArgs e )
