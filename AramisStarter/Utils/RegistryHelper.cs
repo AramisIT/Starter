@@ -30,9 +30,9 @@ namespace AramisStarter.Utils
             private set;
             }
 
-        internal static void Init( string solutionName, string sqlBaseName )
+        internal static void Init( string fullSolutionName )
             {
-            RegistryMainNodeName = string.Format( @"Software\Aramis .NET\{0}.{1}\", solutionName, sqlBaseName );
+            RegistryMainNodeName = string.Format( @"Software\Aramis .NET\{0}\", fullSolutionName);
             processesIDsRegistryKey = InitSubKey( "PIDs" );
             }
 

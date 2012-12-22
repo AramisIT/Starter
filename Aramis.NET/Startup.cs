@@ -64,14 +64,30 @@ namespace Aramis.NET
                 {
                 return;
                 }
-
-            IStarter starter = GetStarter();
+            MessageBox.Show( "Ready to get starter" );
+            IStarter starter;
+            try
+                {
+                starter = GetStarter();
+                }
+            catch ( Exception exp )
+                {
+                MessageBox.Show( string.Format( "GetStarter(); error: ", exp.Message ) );
+                return;
+                }
 
             ExitMutex( starterRuningMutex );
-
+            MessageBox.Show( "Ready to start" );
             if ( starter != null )
                 {
-                starter.Start( args );
+                try
+                    {
+                    starter.Start( args );
+                    }
+                catch ( Exception exp )
+                    {
+                    MessageBox.Show( string.Format( "starter.Start( args ) error: ", exp.Message ) );
+                    }
                 }
             }
 
@@ -99,17 +115,24 @@ namespace Aramis.NET
 
         private static IStarter GetStarter()
             {
-            Assembly starterAssembly = Assembly.LoadFrom( FULL_STARTER_NAME );
-            List<Type> matchedTypes = ( from x in starterAssembly.GetTypes() where typeof( IStarter ).IsAssignableFrom( x ) select x ).ToList<Type>();
 
+            MessageBox.Show( string.Format( "Ready to load Assembly.LoadFrom( FULL_STARTER_NAME );\r\nFull starter name: {0}", FULL_STARTER_NAME ) );
+            Assembly starterAssembly = Assembly.LoadFrom( FULL_STARTER_NAME );
+            MessageBox.Show( " Assembly starterAssembly = Assembly.LoadFrom( FULL_STARTER_NAME );" );
+
+            List<Type> matchedTypes = ( from x in starterAssembly.GetTypes() where typeof( IStarter ).IsAssignableFrom( x ) select x ).ToList<Type>();
+            
             if ( matchedTypes.Count == 0 )
                 {
+               // MessageBox.Show( " if (matchedTypes.Count == 0) " );
                 ShowError( "Не удалось найти класс, реализующий IStarter в загрузчике." );
                 return null;
                 }
             else
                 {
+                //MessageBox.Show( " if ( matchedTypes.Count == 0 ) else" );
                 Type starterType = matchedTypes[ 0 ];
+               // MessageBox.Show( " Type starterType = matchedTypes[ 0 ]; " );
                 object starterObj = Activator.CreateInstance( starterType, new object[] { SOLUTIONS_PATH } );
                 return starterObj as IStarter;
                 }

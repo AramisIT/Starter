@@ -45,12 +45,15 @@ namespace AramisStarter.Utils
 
         internal static SqlConnection GetGuestConnection()
             {
-            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName ) );
+            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName ) );
+            connStrBuilder.ConnectTimeout = 1;
+            return new SqlConnection( connStrBuilder.ConnectionString );
             }
 
         internal static SqlConnection GetUpdateConnection()
             {
-            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, "AramisUpdate" ) );// "UTKDevelopUpdate") );
+            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, "AramisUpdate" ) );
+           // return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName + "Update" ) );
             }
 
         internal static bool CheckPassword( string userId, SecureString securePassword )

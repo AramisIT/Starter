@@ -51,7 +51,7 @@ namespace AramisStarter
 
         private static Mutex GetRunMutex()
             {
-            string mutexName = string.Format( "START_Aramis.Net_{0}.{1}", App.SelectedSolution.SolutionName, App.SelectedSolution.SqlBaseName );
+            string mutexName = string.Format( "START_Aramis.Net_{0}", App.SelectedSolution.BuildFullSolutionName() );
             return new Mutex( false, mutexName );
             }
 

@@ -98,12 +98,7 @@ namespace AramisStarter
                 {
                 newSolutionsList = new List<SolutionInfo>();
                 }
-
-            newSolutionsList.Sort( ( solInfo1, solInfo2 ) =>
-                {
-                    return solInfo1.SolutionFriendlyName.CompareTo( solInfo2.SolutionFriendlyName );
-                } );
-
+            
             solutions = new ObservableCollection<SolutionInfo>( newSolutionsList );
             }
 
@@ -133,10 +128,11 @@ namespace AramisStarter
 
         private static void InitWithSelectedSolution()
             {
-            SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}.{2}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ),
-               SelectedSolution.SolutionName, SelectedSolution.SqlBaseName );
+            string fullSolutionName = SelectedSolution.BuildFullSolutionName();
 
-            RegistryHelper.Init( SelectedSolution.SolutionName, SelectedSolution.SqlBaseName );
+            SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), fullSolutionName );
+
+            RegistryHelper.Init( fullSolutionName );
 
             SolutionUpdater.Init();
             }
@@ -185,7 +181,7 @@ namespace AramisStarter
                 }
 
 
-            Log.testing = ( new List<string>() { "db", "atos", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
+            Log.Testing = ( new List<string>() { "db", "atos", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
 
             if ( Thread.CurrentThread.Name == null )
                 {
@@ -226,7 +222,7 @@ namespace AramisStarter
                 {
                 InitWithSelectedSolution();
 
-                if ( Log.testing )
+                if ( Log.Testing )
                     {
                     ( new Log() ).Show();
                     }

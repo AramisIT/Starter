@@ -48,7 +48,7 @@ namespace AramisStarter
 
         void checkLoadingStatusWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
             {
-            if ( e.ProgressPercentage > MAX_PROGRESS_VALUE )
+            if ( e.ProgressPercentage > MAX_PROGRESS_VALUE && Starter.SolutionLoaded )
                 {
                 Hide();
                 }

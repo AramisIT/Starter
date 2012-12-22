@@ -62,7 +62,8 @@ namespace AramisStarter
             SolutionInfo resultSolution = currentItem.Tag as SolutionInfo;
             newSolution = resultSolution;
             if ( DatabaseHelper.ReadSolutionInfo( resultSolution.SqlServerName, resultSolution.SqlBaseName, out resultSolution ) )
-                {              
+                {
+                isSolutionRecognized = true;
                 Close();
                 }
             else
@@ -126,6 +127,8 @@ namespace AramisStarter
             set;
             }
 
+        private bool isSolutionRecognized;
+
         private void databaseNameComboBox_KeyDown( object sender, KeyEventArgs e )
             {
             if ( e.Key == Key.Enter )
@@ -187,7 +190,7 @@ namespace AramisStarter
             {
             AddNewSystemWindow addNewSystemWindow = new AddNewSystemWindow();
             addNewSystemWindow.ShowDialog();
-            return addNewSystemWindow.newSolution;
+            return addNewSystemWindow.isSolutionRecognized ? addNewSystemWindow.newSolution : null;
             }
 
         private void solutionNameTextBox_TextChanged( object sender, TextChangedEventArgs e )

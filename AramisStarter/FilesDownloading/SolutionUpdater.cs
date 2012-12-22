@@ -458,7 +458,6 @@ namespace AramisStarter.FilesDownloading
 
             string queryText = string.Format( "select f.RowId Id, f.UpdateFile FileData from {0}Update f join @FilesId ids on ids.FileId = f.RowId order by f.RowId",
                 App.SelectedSolution.SolutionName );
-            //App.SelectedSolution.SqlBaseName);
 
             int tryNumber = 1;
             int taskSize = filesToDownLoad.Count;
@@ -789,8 +788,9 @@ namespace AramisStarter.FilesDownloading
                     return versionObj == null ? 0 : Convert.ToInt32( versionObj );
                     }
                 }
-            catch
+            catch (Exception exp)
                 {
+                Trace.WriteLine( string.Format( "GetAccessibleUpdateNumber error: {0}", exp.Message ) );
                 return 0;
                 }
             finally
@@ -879,9 +879,7 @@ namespace AramisStarter.FilesDownloading
 
         private static void InitMutexes()
             {
-            TryToUpdateAramisSolution = new Mutex( false, TRY_TO_UPDATE_ARAMIS_SOLUTION_STR
-                + "." + App.SelectedSolution.SolutionName
-                + "." + App.SelectedSolution.SqlBaseName );
+            TryToUpdateAramisSolution = new Mutex( false, string.Format("{0}.{1}", TRY_TO_UPDATE_ARAMIS_SOLUTION_STR, App.SelectedSolution.BuildFullSolutionName()));
             }
 
         private void TryToUpdateStarter()

@@ -18,7 +18,7 @@ namespace AramisStarter
     /// </summary>
     public partial class Log : Window
         {
-        internal static volatile bool testing = false;
+        internal static volatile bool Testing = false;
 
         private static volatile bool windowCreated = false;
         private static Log logWindow;
@@ -41,7 +41,7 @@ namespace AramisStarter
             {
             lock ( appendLocker )
                 {
-                if ( Log.testing )
+                if ( Log.Testing )
                     {
                     if ( !windowCreated )
                         {
