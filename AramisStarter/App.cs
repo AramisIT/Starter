@@ -165,6 +165,16 @@ namespace AramisStarter
             App.solutionsPath = solutionsPath;
             }
 
+        [STAThread()]
+        static void Main( string[] args )
+            {
+            string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+            string solutionPath = STARTER_PATH + @"\Solutions.xml";
+
+            App app = new App( solutionPath );
+            app.Start( args );
+            }
+
         public void Start( string[] args )
             {
 
