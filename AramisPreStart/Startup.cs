@@ -26,7 +26,7 @@ namespace AramisPreStart
             }
 
         private const string STARTER_NAME = "AramisSolution.exe";
-        private static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+        internal static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
         private static readonly string SOLUTIONS_PATH = STARTER_PATH + @"\Solutions.xml";
         private static readonly string FULL_STARTER_NAME = GetFullStarterPath();
 
@@ -63,7 +63,7 @@ namespace AramisPreStart
                 return;
                 }
 
-            if ( File.Exists(FULL_STARTER_NAME))
+            if ( File.Exists( FULL_STARTER_NAME ) )
                 {
                 try
                     {
@@ -98,7 +98,7 @@ namespace AramisPreStart
                 }
 
             return true;
-            }       
+            }
 
         private static bool InstallStarter()
             {
@@ -107,28 +107,71 @@ namespace AramisPreStart
                 Directory.CreateDirectory( STARTER_PATH );
                 }
 
+            bool starterInstalled = TryToDownLoadStarter();
+
+            if ( !starterInstalled && !AramisStarter.AddNewSystemWindow.Showed )
+                {
+                RefreshStarterPathParameters();
+                starterInstalled = TryToDownLoadStarter();
+                }
+
+            return starterInstalled;
+            }
+
+        private static bool TryToDownLoadStarter()
+            {
             SqlConnection conn = DatabaseHelper.GetOpenedConnection();
+
+            if ( conn == null )
+                {
+                if ( !AramisStarter.AddNewSystemWindow.Showed )
+                    {
+                    RefreshStarterPathParameters();
+
+                    // Вторая попытка
+                    conn = DatabaseHelper.GetOpenedConnection();
+                    }
+                }
+
             if ( conn == null )
                 {
                 return false;
                 }
 
+            return DownLoadStarter( conn );
+            }
+
+        private static void RefreshStarterPathParameters()
+            {
+            // Возможно нужно обновить параметры подключения
+            StarterUpdateDatabasePath.RefreshStarterUpdateDatabasePath( "Не удалось подключиться к базе загрузчика." );
+            }
+
+        private static bool DownLoadStarter( SqlConnection conn )
+            {
             try
                 {
                 using ( SqlCommand command = conn.CreateCommand() )
                     {
                     command.CommandText = "select [Data], LEN([Data]) FileSize, RTRIM([FileName]) FileName from [Starter]";
-                    using ( SqlDataReader dataReader = command.ExecuteReader() )
+                    try
                         {
-                        while ( dataReader.Read() )
+                        using ( SqlDataReader dataReader = command.ExecuteReader() )
                             {
-                            string filePath = String.Format( @"{0}\{1}", STARTER_PATH, dataReader[ "FileName" ] as string );
-                            long fileSize = Convert.ToInt64( dataReader[ "FileSize" ] );
-                            if ( !SaveTemporaryFile( filePath, fileSize, dataReader ) )
+                            while ( dataReader.Read() )
                                 {
-                                throw new Exception( string.Format( "Не удалось сохранить загруженный файл ({0})", filePath ) );
+                                string filePath = String.Format( @"{0}\{1}", STARTER_PATH, dataReader[ "FileName" ] as string );
+                                long fileSize = Convert.ToInt64( dataReader[ "FileSize" ] );
+                                if ( !SaveTemporaryFile( filePath, fileSize, dataReader ) )
+                                    {
+                                    throw new Exception( string.Format( "Не удалось сохранить загруженный файл ({0})", filePath ) );
+                                    }
                                 }
                             }
+                        }
+                    catch ( SqlException sqlException )
+                        {
+                        throw new Exception( string.Format( "ошибка получения данных - {0}", sqlException.Message ) );
                         }
                     }
                 }
@@ -147,7 +190,7 @@ namespace AramisPreStart
             return true;
             }
 
-        private static void ShowError( string errorMessage )
+        internal static void ShowError( string errorMessage )
             {
             MessageBox.Show( errorMessage, "Aramis .NET starter", MessageBoxButton.OK, MessageBoxImage.Error );
             }

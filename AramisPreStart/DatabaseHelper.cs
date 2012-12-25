@@ -2,27 +2,36 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
+using AramisStarter;
 
 namespace AramisPreStart
     {
     class DatabaseHelper
         {
-        private static readonly string CONNECTION_STRING = GetConnectionString();
-        private const string DATABASE_NAME = "AramisUpdate";
         private const string DATABASE_LOGIN = "AramisGuest";
-        private const string DATABASE_PASSWORD = "vjhrjdysqcjrjcnsdftn";  
-
+        private const string DATABASE_PASSWORD = "vjhrjdysqcjrjcnsdftn";
+       
         internal static SqlConnection GetOpenedConnection()
             {
-            SqlConnection conn = new SqlConnection( CONNECTION_STRING );
+            string connectionString = GetConnectionString();
+            if ( connectionString == null )
+                {
+                return null;
+                }
+
+            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( connectionString );
+            connStrBuilder.ConnectTimeout = 5;           
+            SqlConnection conn = new SqlConnection( connStrBuilder.ConnectionString );
+           
             try
                 {
                 conn.Open();
                 }
-            catch
-                {
+            catch 
+                {                
                 return null;
                 }
 
@@ -38,11 +47,23 @@ namespace AramisPreStart
 
         private static string GetConnectionString()
             {
+            StarterUpdateDatabasePath starterUpdateDatabasePath;
+            if ( !StarterUpdateDatabasePath.GetStarterDatabasePath( out starterUpdateDatabasePath ) )
+                {
+                return null;
+                }
+
             return string.Format( "Data Source={0};Initial Catalog={1};User ID={2};Password={3}",
-                PublicStarterProperties.DefaultServerName,
-                DATABASE_NAME,
+                starterUpdateDatabasePath.ServerName,
+                starterUpdateDatabasePath.DatabaseName,
                 DATABASE_LOGIN,
                 DATABASE_PASSWORD );
-            }       
+            }
+
+         
+
+        
         }
+
+   
     }

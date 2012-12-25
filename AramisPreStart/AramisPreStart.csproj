@@ -41,6 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -54,10 +55,15 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddingDatabaseForStarterUpdate\AddNewSystemWindow.xaml.cs">
+      <DependentUpon>AddNewSystemWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddingDatabaseForStarterUpdate\App.cs" />
     <Compile Include="DatabaseHelper.cs" />
-    <Compile Include="PublicStarterProperties.cs" />
+    <Compile Include="StarterUpdateDatabasePath.cs" />
     <Compile Include="StarterUpdater.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utils\EmbededResourcesConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -77,7 +83,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="App.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -86,6 +91,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="media_player.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AddingDatabaseForStarterUpdate\AddNewSystemWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\transparent.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
