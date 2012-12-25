@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 
-namespace Aramis.NET
+namespace AramisPreStart
     {
     class Startup
         {
@@ -25,7 +25,7 @@ namespace Aramis.NET
             return isReleaseMode;
             }
 
-        private const string STARTER_NAME = "AramisStarter.dll";
+        private const string STARTER_NAME = "AramisSolution.exe";
         private static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
         private static readonly string SOLUTIONS_PATH = STARTER_PATH + @"\Solutions.xml";
         private static readonly string FULL_STARTER_NAME = GetFullStarterPath();
@@ -47,15 +47,13 @@ namespace Aramis.NET
 
         #endregion
 
-
-
-        private static Mutex starterRuningMutex = new Mutex( false, "Aramis.Net_StarterRuningUpdating" );
+        private static readonly Mutex STARTER_RUNNING_MUTEX = new Mutex( false, "AramisPreStart_StarterRuningUpdating" );
         private const int BUFFER_SIZE = 256 * 128;
 
         [STAThread()]
         static void Main( string[] args )
             {
-            if ( !EnterMutex( starterRuningMutex, 1000 ) )
+            if ( !EnterMutex( STARTER_RUNNING_MUTEX, 1000 ) )
                 {
                 return;
                 }
@@ -64,31 +62,20 @@ namespace Aramis.NET
                 {
                 return;
                 }
-            MessageBox.Show( "Ready to get starter" );
-            IStarter starter;
-            try
-                {
-                starter = GetStarter();
-                }
-            catch ( Exception exp )
-                {
-                MessageBox.Show( string.Format( "GetStarter(); error: ", exp.Message ) );
-                return;
-                }
 
-            ExitMutex( starterRuningMutex );
-            MessageBox.Show( "Ready to start" );
-            if ( starter != null )
+            if ( File.Exists(FULL_STARTER_NAME))
                 {
                 try
                     {
-                    starter.Start( args );
+                    Process.Start( FULL_STARTER_NAME );
                     }
                 catch ( Exception exp )
                     {
-                    MessageBox.Show( string.Format( "starter.Start( args ) error: ", exp.Message ) );
+                    ShowError( string.Format( "Can't start Aramis starter", exp.Message ) );
                     }
                 }
+
+            ExitMutex( STARTER_RUNNING_MUTEX );
             }
 
         private static bool CheckStarterFiles()
@@ -111,32 +98,7 @@ namespace Aramis.NET
                 }
 
             return true;
-            }
-
-        private static IStarter GetStarter()
-            {
-
-            MessageBox.Show( string.Format( "Ready to load Assembly.LoadFrom( FULL_STARTER_NAME );\r\nFull starter name: {0}", FULL_STARTER_NAME ) );
-            Assembly starterAssembly = Assembly.LoadFrom( FULL_STARTER_NAME );
-            MessageBox.Show( " Assembly starterAssembly = Assembly.LoadFrom( FULL_STARTER_NAME );" );
-
-            List<Type> matchedTypes = ( from x in starterAssembly.GetTypes() where typeof( IStarter ).IsAssignableFrom( x ) select x ).ToList<Type>();
-            
-            if ( matchedTypes.Count == 0 )
-                {
-               // MessageBox.Show( " if (matchedTypes.Count == 0) " );
-                ShowError( "Не удалось найти класс, реализующий IStarter в загрузчике." );
-                return null;
-                }
-            else
-                {
-                //MessageBox.Show( " if ( matchedTypes.Count == 0 ) else" );
-                Type starterType = matchedTypes[ 0 ];
-               // MessageBox.Show( " Type starterType = matchedTypes[ 0 ]; " );
-                object starterObj = Activator.CreateInstance( starterType, new object[] { SOLUTIONS_PATH } );
-                return starterObj as IStarter;
-                }
-            }
+            }       
 
         private static bool InstallStarter()
             {

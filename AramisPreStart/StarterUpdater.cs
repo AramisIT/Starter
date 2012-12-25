@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Aramis.NET
+namespace AramisPreStart
     {
     internal class StarterUpdater
         {

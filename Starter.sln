@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aramis.NET", "Aramis.NET\Aramis.NET.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisSolution", "AramisSolution\AramisSolution.csproj", "{CE5A42C7-0052-42E3-8C73-0C710412925C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisStarter", "AramisStarter\AramisStarter.csproj", "{CE5A42C7-0052-42E3-8C73-0C710412925C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisPreStart", "AramisPreStart\AramisPreStart.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

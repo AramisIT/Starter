@@ -9,13 +9,12 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml.Linq;
-using Aramis.NET;
 using AramisStarter.FilesDownloading;
 using AramisStarter.Utils;
 
 namespace AramisStarter
     {
-    public class App : Application, IStarter
+    public class App : Application
         {
         #region private
 
@@ -175,7 +174,7 @@ namespace AramisStarter
             app.Start( args );
             }
 
-        public void Start( string[] args )
+        private void Start( string[] args )
             {
 
             if ( ProcessHelper.GetOtherSameProcessesList( true ).Count > 0 )

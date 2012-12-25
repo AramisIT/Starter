@@ -7,8 +7,8 @@
     <ProjectGuid>{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Aramis.NET</RootNamespace>
-    <AssemblyName>Aramis.NET</AssemblyName>
+    <RootNamespace>AramisPreStart</RootNamespace>
+    <AssemblyName>AramisPreStart</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseHelper.cs" />
-    <Compile Include="IStarter.cs" />
     <Compile Include="PublicStarterProperties.cs" />
     <Compile Include="StarterUpdater.cs" />
     <Compile Include="Startup.cs" />
