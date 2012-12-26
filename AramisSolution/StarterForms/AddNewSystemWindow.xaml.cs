@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -33,10 +33,43 @@ namespace AramisStarter
             Icon = EmbededResourcesConverter.BitmapSourceFromBitmap( Properties.Resources.Transparent );
             }
 
+        internal static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+        private static readonly string STARTER_UPDATE_DATABASE_PATH_INFO = STARTER_PATH + @"\StarterUpdateSource.ini";
+
+        private string GetDefaultServerName()
+            {
+            if ( File.Exists( STARTER_UPDATE_DATABASE_PATH_INFO ) )
+                {
+                string databasePath = File.ReadAllText( STARTER_UPDATE_DATABASE_PATH_INFO ).Trim();
+                int separatorIndex = databasePath.IndexOf( ';' );
+                if ( separatorIndex >= 1 )
+                    {
+                    return databasePath.Substring( 0, separatorIndex ).Trim();
+                    }
+                }
+
+            return "";
+            }
+
+        private string GetDefaultDatabaseName()
+            {
+            if ( File.Exists( STARTER_UPDATE_DATABASE_PATH_INFO ) )
+                {
+                string databasePath = File.ReadAllText( STARTER_UPDATE_DATABASE_PATH_INFO ).Trim();
+                int separatorIndex = databasePath.IndexOf( ';' );
+                if ( separatorIndex >= 1 )
+                    {
+                    return databasePath.Substring( separatorIndex + 1 ).Trim();
+                    }
+                }
+
+            return null;
+            }
+
         private void Window_Loaded_1( object sender, RoutedEventArgs e )
             {
             VistaGlassHelper.ExtendGlass( this, -1, -1, -1, -1 );
-            string serverName = Aramis.NET.PublicStarterProperties.DefaultServerName;
+            string serverName = GetDefaultServerName();
             if ( serverName != null )
                 {
                 serverNameTextBox.Text = serverName;
@@ -87,16 +120,25 @@ namespace AramisStarter
 
             if ( errorMessage == null )
                 {
+                string defaultDatabaseName = GetDefaultDatabaseName().ToLower();
+                ComboBoxItem defaultItem = null;
+
                 databasesInfo.ForEach( databaseInfo =>
                     {
                         ComboBoxItem item = new ComboBoxItem();
                         item.Content = databaseInfo.SqlBaseName;
                         item.Tag = databaseInfo;
                         databaseNameComboBox.Items.Add( item );
+
+                        if ( defaultItem == null && defaultDatabaseName == databaseInfo.SqlBaseName.ToLower() )
+                            {
+                            defaultItem = item;
+                            }
                     } );
+
                 if ( databaseNameComboBox.Items.Count > 0 )
                     {
-                    databaseNameComboBox.SelectedItem = databaseNameComboBox.Items[ 0 ];
+                    databaseNameComboBox.SelectedItem = defaultItem != null ? defaultItem : databaseNameComboBox.Items[ 0 ];
                     }
                 }
             else

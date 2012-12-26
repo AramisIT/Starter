@@ -39,7 +39,7 @@ namespace AramisPreStart
             else
                 {
                 string ProgramPath = System.IO.Path.GetDirectoryName( System.Reflection.Assembly.GetExecutingAssembly().Location );
-                return ProgramPath + "\\..\\..\\..\\AramisStarter\\bin\\Debug\\" + STARTER_NAME;
+                return ProgramPath + "\\..\\..\\..\\AramisSolution\\bin\\Debug\\" + STARTER_NAME;
                 }
             }
 
@@ -67,7 +67,8 @@ namespace AramisPreStart
                 {
                 try
                     {
-                    Process.Start( FULL_STARTER_NAME );
+                    string parameter = args.Length == 0 ? "" : args[ 0 ];
+                    Process.Start( FULL_STARTER_NAME, parameter );
                     }
                 catch ( Exception exp )
                     {

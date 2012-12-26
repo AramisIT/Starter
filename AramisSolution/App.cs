@@ -97,7 +97,7 @@ namespace AramisStarter
                 {
                 newSolutionsList = new List<SolutionInfo>();
                 }
-            
+
             solutions = new ObservableCollection<SolutionInfo>( newSolutionsList );
             }
 
@@ -198,7 +198,7 @@ namespace AramisStarter
                 }
 
             ReadSolutions();
-          //  ( new WpfApplication1.SolutionSelectingWindowXXX() ).ShowDialog();
+            //  ( new WpfApplication1.SolutionSelectingWindowXXX() ).ShowDialog();
             // Нужно что это окно было создано первым, т.к. оно будет главным
             LoginWindow mainWindow = LoginWindow.Window;
 
@@ -216,7 +216,11 @@ namespace AramisStarter
 
             SelectedSolution = null;
 
-            if ( solutions.Count == 1 && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
+            if ( solutions.Count == 0 )
+                {
+                return;
+                }
+            else if ( solutions.Count == 1 && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
                 {
                 SelectedSolution = solutions[ 0 ];
                 }
