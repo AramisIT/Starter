@@ -52,8 +52,7 @@ namespace AramisStarter.Utils
 
         internal static SqlConnection GetUpdateConnection()
             {
-            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, "AramisUpdate" ) );
-           // return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName + "Update" ) );
+            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, UpdateDatabaseName ) );
             }
 
         internal static bool CheckPassword( string userId, SecureString securePassword )
@@ -289,10 +288,16 @@ select 1 ok;
 
         internal static bool ReadSolutionInfo( string serverName, string databaseName, out SolutionInfo solutionInfo )
             {
+            solutionInfo = null;
+
+            if ( string.IsNullOrEmpty( serverName ) || string.IsNullOrEmpty( databaseName ) )
+                {
+                return false;
+                }
+
             string systemNameInfo = GetSolutionNameInfo( serverName, databaseName );
             if ( systemNameInfo == null )
                 {
-                solutionInfo = null;
                 return false;
                 }
 
@@ -337,5 +342,47 @@ select 1 ok;
                 }
             }
 
+        private static string UpdateDatabaseName
+            {
+            get
+                {
+                return updateDatabaseName ?? ( updateDatabaseName = GetDatabaseName() );
+                }
+            }
+
+        private const string OLD_DATABASE_NAME = "AramisUpdate";
+
+        private static string GetDatabaseName()
+            {
+            if ( TryToOpenConnection( OLD_DATABASE_NAME ) )
+                {
+                return OLD_DATABASE_NAME;
+                }
+            else
+                {
+                return App.SelectedSolution.SqlBaseName + "Update";
+                }
+
+            }
+
+        private static bool TryToOpenConnection( string databaseName )
+            {
+            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( GetConnectionString( App.SelectedSolution.SqlServerName, databaseName ) );
+            connStrBuilder.ConnectTimeout = 1;
+
+            using ( SqlConnection conn = new SqlConnection( connStrBuilder.ConnectionString ) )
+                {
+                try
+                    {
+                    conn.Open();
+                    return conn.State == ConnectionState.Open;
+                    }
+                catch { }
+                }
+
+            return false;
+            }
+
+        private static string updateDatabaseName;
         }
     }

@@ -1,0 +1,13 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:AramisStarter">
+  
+    <LinearGradientBrush EndPoint="0.989,0.967" StartPoint="0.027,0.033" x:Key="FormBackground">
+        <GradientStop Color="#FF838BFF" Offset="0"/>
+        <GradientStop Color="#FFC9CFFD" Offset="1"/>
+        <GradientStop Color="#FF88A4FF" Offset="0.174"/>
+        <GradientStop Color="#FFC0CCFD" Offset="0.253"/>
+        <GradientStop Color="#FF767EFF" Offset="0.386"/>
+    </LinearGradientBrush>
+</ResourceDictionary>

@@ -108,7 +108,7 @@ namespace AramisStarter
                 {
                 UseAlternativeStyle();
                 }
-
+            listBox.Focus();
             }
 
         private void UseAlternativeStyle()

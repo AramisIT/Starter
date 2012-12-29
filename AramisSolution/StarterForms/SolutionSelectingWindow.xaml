@@ -4,59 +4,54 @@
         xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
         Title="Выбор системы для запуска" Height="238" Width="395" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="Transparent" Loaded="Window_Loaded">
     <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/FormsStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <DataTemplate x:Key="SelectingSolution">
-            <TextBlock Text="{Binding Path=SolutionFriendlyName}" MouseDown="TextBlock_MouseDown_1" FontWeight="Medium" FontSize="20"/>
-        </DataTemplate>
 
-        <DataTemplate x:Key="EditSolutionsList">
-            <Grid Background="White" Height="25">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Image Width="16" Height="16" Source="../Images/DeepBlue_16x16.png" Opacity="0" x:Name="image"/>
-                <TextBox Grid.Column="1" Text="{Binding Path=SolutionFriendlyName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+            <DataTemplate x:Key="SelectingSolution">
+                <TextBlock Text="{Binding Path=SolutionFriendlyName}" MouseDown="TextBlock_MouseDown_1" FontWeight="Medium" FontSize="20" Margin="10,0,0,0"/>
+            </DataTemplate>
+
+            <DataTemplate x:Key="EditSolutionsList">
+                <Grid Background="White" Height="25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Width="16" Height="16" Source="../Images/DeepBlue_16x16.png" Opacity="0" x:Name="image"/>
+                    <TextBox Grid.Column="1" Text="{Binding Path=SolutionFriendlyName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                          MouseDown="TextBlock_MouseDown_1" FontWeight="Medium" FontSize="18" HorizontalAlignment="Stretch"
                          BorderThickness="0"     
                          PreviewDrop="ItemDrop" 
                          PreviewDragOver="TextBoxItemDragEnter" 
                          PreviewDragEnter="TextBoxItemDragEnter"
                          />
-                <Button Grid.Column="2" Height="16" Width="16" Click="RemoveButton_Click" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage" Focusable="True"/>
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage"/>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseOver.png"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseDown.png"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
-            </Grid>
-        </DataTemplate>
-        <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter"/>
+                    <Button Grid.Column="2" Height="16" Width="16" Click="RemoveButton_Click" Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage" Focusable="True"/>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Image Width="16" Height="16" Source="../Images/removeButton.png" x:Name="buttonImage"/>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseOver.png"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="buttonImage" Property="Source" Value="../Images/removeButtonMouseDown.png"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </DataTemplate>
+            <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter"/>
+        </ResourceDictionary>
     </Window.Resources>
     <!--Background="#699F"-->
-    <Grid  ShowGridLines="False" Visibility="Visible">
-        <Grid.Background>
-            <SolidColorBrush Color="#0000"/>
-            <!--<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                <GradientStop Offset="0" Color="#6000"></GradientStop>
-                <GradientStop Offset="0.2" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.3" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.5" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.6" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.8" Color="#6000"></GradientStop>
-            </LinearGradientBrush>-->
-        </Grid.Background>
+    <Grid  ShowGridLines="False" Visibility="Visible" Background="{StaticResource FormBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>

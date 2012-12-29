@@ -202,13 +202,19 @@ namespace AramisStarter
             // Нужно что это окно было создано первым, т.к. оно будет главным
             LoginWindow mainWindow = LoginWindow.Window;
 
-            if ( solutions.Count == 0 )
+            bool emptySolutionListAtStart = solutions.Count == 0;
+            if ( emptySolutionListAtStart )
                 {
-                SolutionInfo newSolutionInfo = AddNewSystemWindow.AddNewSolution();
-                if ( newSolutionInfo != null )
+                TryToAddDefaultSolution();
+
+                if ( solutions.Count == 0 )
                     {
-                    solutions.Add( newSolutionInfo );
-                    SaveSolutionsList( solutions );
+                    SolutionInfo newSolutionInfo = AddNewSystemWindow.AddNewSolution();
+                    if ( newSolutionInfo != null )
+                        {
+                        solutions.Add( newSolutionInfo );
+                        SaveSolutionsList( solutions );
+                        }
                     }
                 }
 
@@ -220,7 +226,7 @@ namespace AramisStarter
                 {
                 return;
                 }
-            else if ( solutions.Count == 1 && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
+            else if ( solutions.Count == 1 && !emptySolutionListAtStart && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
                 {
                 SelectedSolution = solutions[ 0 ];
                 }
@@ -241,6 +247,17 @@ namespace AramisStarter
                     }
 
                 Run( mainWindow );
+                }
+            }
+
+        private void TryToAddDefaultSolution()
+            {
+            SolutionInfo defaultSolution = SolutionInfo.GetDefaultSolution();
+
+            if ( defaultSolution != null )
+                {
+                solutions.Add( defaultSolution );
+                SaveSolutionsList( solutions );                
                 }
             }
 

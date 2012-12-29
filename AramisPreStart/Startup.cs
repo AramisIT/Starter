@@ -121,7 +121,7 @@ namespace AramisPreStart
 
         private static bool TryToDownLoadStarter()
             {
-            SqlConnection conn = DatabaseHelper.GetOpenedConnection();
+            SqlConnection conn = DatabaseHelper.GetOpenedUpdateConnection();
 
             if ( conn == null )
                 {
@@ -130,7 +130,7 @@ namespace AramisPreStart
                     RefreshStarterPathParameters();
 
                     // Вторая попытка
-                    conn = DatabaseHelper.GetOpenedConnection();
+                    conn = DatabaseHelper.GetOpenedUpdateConnection();
                     }
                 }
 

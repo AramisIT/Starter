@@ -3,40 +3,37 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Вход в систему {0}" Height="190" Width="395" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Background="Transparent" Loaded="Window_Loaded">
     <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Themes/FormsStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="FontFamily" Value="Calibri"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="Margin" Value="20,15,20,0"/>
+            </Style>
+            <Style TargetType="{x:Type TextBlock}" x:Key="LoginPasswLabel">
+                <Setter Property="FontFamily" Value="Calibri"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="Height" Value="25"/>
+                <Setter Property="Padding" Value="40,0,0,0"/>
+            </Style>
+            <Style TargetType="{x:Type Control}" x:Key="LoginPasswLabelBox">
+                <Setter Property="Height" Value="25"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="Margin" Value="0,0,40,0"/>
+            </Style>
 
-        <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="FontFamily" Value="Calibri"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="Margin" Value="20,15,20,0"/>
-        </Style>
-        <Style TargetType="{x:Type TextBlock}" x:Key="LoginPasswLabel">
-            <Setter Property="FontFamily" Value="Calibri"/>
-            <Setter Property="VerticalAlignment" Value="Bottom"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Padding" Value="40,0,0,0"/>
-        </Style>
-        <Style TargetType="{x:Type Control}" x:Key="LoginPasswLabelBox">
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="VerticalAlignment" Value="Bottom"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Margin" Value="0,0,40,0"/>
-        </Style>
+        </ResourceDictionary>
     </Window.Resources>
     <!--Background="#699F"-->
     <Grid  ShowGridLines="False" Visibility="Visible">
         <Grid.Background>
             <SolidColorBrush Color="#0000"/>
-            <!--<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                <GradientStop Offset="0" Color="#6000"></GradientStop>
-                <GradientStop Offset="0.2" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.3" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.5" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.6" Color="#688F"></GradientStop>
-                <GradientStop Offset="0.8" Color="#6000"></GradientStop>
-            </LinearGradientBrush>-->
         </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="0"></RowDefinition>
@@ -49,24 +46,8 @@
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition Width="260"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Grid Height="{Binding Path=Height, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Panel.ZIndex="-1000" Grid.ColumnSpan="2" Grid.RowSpan="5" Visibility="Hidden" x:Name="backGroungImage">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.989,0.967" StartPoint="0.027,0.033">
-                    <GradientStop Color="#FF838BFF" Offset="0"/>
-                    <GradientStop Color="#FFC9CFFD" Offset="1"/>
-                    <GradientStop Color="#FF88A4FF" Offset="0.174"/>
-                    <GradientStop Color="#FFC0CCFD" Offset="0.253"/>
-                    <GradientStop Color="#FF767EFF" Offset="0.386"/>
-                </LinearGradientBrush>
-
-                <!--<LinearGradientBrush EndPoint="0.989,0.967" StartPoint="0.027,0.033">
-                    <GradientStop Color="#FF9D9D9D" Offset="0"/>
-                    <GradientStop Color="#FFDADADA" Offset="1"/>
-                    <GradientStop Color="#FFABABAB" Offset="0.174"/>
-                    <GradientStop Color="#FFD2D2D2" Offset="0.252"/>
-                    <GradientStop Color="#FFA5A5A5" Offset="0.446"/>
-                </LinearGradientBrush>-->
-            </Grid.Background>
+        <Grid Background="{StaticResource FormBackground}"  Height="{Binding Path=Height, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Panel.ZIndex="-1000" Grid.ColumnSpan="2" Grid.RowSpan="5" Visibility="Hidden" x:Name="backGroungImage">
+            
         </Grid>
         <!--<Image Height="{Binding Path=Height, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Width="{Binding Path=Width, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Panel.ZIndex="-1000" Grid.ColumnSpan="2" Grid.RowSpan="5" Visibility="Hidden" x:Name="backGroungImage"/>-->
         <TextBlock Grid.Row="1" Style="{StaticResource LoginPasswLabel}" Foreground="White" Text="Имя">
@@ -80,7 +61,7 @@
             </TextBlock.Effect>
         </TextBlock>
 
-        <ComboBox x:Name="NamesDescriptions" FontSize="12" Grid.Row="1" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" SelectionChanged="ComboBox_SelectionChanged_1" KeyDown="NamesDescriptions_KeyDown">
+        <ComboBox x:Name="NamesDescriptions" IsEditable="True" FontSize="12" Grid.Row="1" Grid.Column="1" Style="{StaticResource LoginPasswLabelBox}" SelectionChanged="ComboBox_SelectionChanged_1" KeyDown="NamesDescriptions_KeyDown">
             <ComboBox.Resources>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="FontSize" Value="16"/>

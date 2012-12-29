@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using AramisStarter.Utils;
 
 
 namespace AramisStarter
     {
     public class SolutionInfo
         {
+
+        private static readonly string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+        private static readonly string STARTER_UPDATE_DATABASE_PATH_INFO = STARTER_PATH + @"\StarterUpdateSource.ini";
+
         public string SqlServerName
             {
             get;
@@ -66,5 +72,50 @@ namespace AramisStarter
 
             return safeServerName.ToString();
             }
+
+        internal static SolutionInfo GetDefaultSolution()
+            {
+            SolutionInfo newSolutionInfo;
+            if ( DatabaseHelper.ReadSolutionInfo( GetDefaultServerName(), GetDefaultDatabaseName(), out newSolutionInfo ) )
+                {
+                return newSolutionInfo;
+                }
+            else
+                {
+                return null;
+                }
+            }
+
+        internal static string GetDefaultServerName()
+            {
+            if ( File.Exists( STARTER_UPDATE_DATABASE_PATH_INFO ) )
+                {
+                string databasePath = File.ReadAllText( STARTER_UPDATE_DATABASE_PATH_INFO ).Trim();
+                int separatorIndex = databasePath.IndexOf( ';' );
+                if ( separatorIndex >= 1 )
+                    {
+                    return databasePath.Substring( 0, separatorIndex ).Trim();
+                    }
+                }
+
+            return "";
+            }
+
+        private static string GetDefaultDatabaseName()
+            {
+            if ( File.Exists( STARTER_UPDATE_DATABASE_PATH_INFO ) )
+                {
+                string databasePath = File.ReadAllText( STARTER_UPDATE_DATABASE_PATH_INFO ).Trim();
+                int separatorIndex = databasePath.IndexOf( ';' );
+                if ( separatorIndex >= 1 )
+                    {
+                    return databasePath.Substring( separatorIndex + 1 ).Trim();
+                    }
+                }
+
+            return null;
+            }
+
+
         }
     }

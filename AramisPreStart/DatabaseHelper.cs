@@ -13,25 +13,25 @@ namespace AramisPreStart
         {
         private const string DATABASE_LOGIN = "AramisGuest";
         private const string DATABASE_PASSWORD = "vjhrjdysqcjrjcnsdftn";
-       
-        internal static SqlConnection GetOpenedConnection()
+
+        internal static SqlConnection GetOpenedUpdateConnection()
             {
-            string connectionString = GetConnectionString();
+            string connectionString = GetUpdateConnectionString();
             if ( connectionString == null )
                 {
                 return null;
                 }
 
             SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( connectionString );
-            connStrBuilder.ConnectTimeout = 5;           
+            connStrBuilder.ConnectTimeout = 5;
             SqlConnection conn = new SqlConnection( connStrBuilder.ConnectionString );
-           
+
             try
                 {
                 conn.Open();
                 }
-            catch 
-                {                
+            catch
+                {
                 return null;
                 }
 
@@ -45,7 +45,7 @@ namespace AramisPreStart
                 }
             }
 
-        private static string GetConnectionString()
+        private static string GetUpdateConnectionString()
             {
             StarterUpdateDatabasePath starterUpdateDatabasePath;
             if ( !StarterUpdateDatabasePath.GetStarterDatabasePath( out starterUpdateDatabasePath ) )
@@ -55,15 +55,15 @@ namespace AramisPreStart
 
             return string.Format( "Data Source={0};Initial Catalog={1};User ID={2};Password={3}",
                 starterUpdateDatabasePath.ServerName,
-                starterUpdateDatabasePath.DatabaseName,
+                starterUpdateDatabasePath.DatabaseName + "Update",
                 DATABASE_LOGIN,
                 DATABASE_PASSWORD );
             }
 
-         
 
-        
+
+
         }
 
-   
+
     }

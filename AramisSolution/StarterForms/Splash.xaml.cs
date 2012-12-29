@@ -48,6 +48,8 @@ namespace AramisStarter
 
         void checkLoadingStatusWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
             {
+            //long timeElapsed = ( long )( ( TimeSpan )( DateTime.Now - startTime ) ).TotalSeconds;
+
             if ( e.ProgressPercentage > MAX_PROGRESS_VALUE && Starter.SolutionLoaded )
                 {
                 Hide();
@@ -81,10 +83,10 @@ namespace AramisStarter
                 else
                     {
                     ReportProgress( SolutionUpdater.DownloadingComplateProgress );
-                    if ( SolutionUpdater.DownloadingComplateProgress == MAX_PROGRESS_VALUE )
-                        {
-                        return;
-                        }
+                    //if ( SolutionUpdater.DownloadingComplateProgress == MAX_PROGRESS_VALUE )
+                    //    {
+                    //    return;
+                    //    }
                     }
 
                 System.Threading.Thread.Sleep( 250 );
@@ -168,6 +170,7 @@ namespace AramisStarter
 
         internal void ShowSlowly()
             {
+
             SplashWindow.logoImage.Opacity = 0;
             SplashWindow.loadingProgress.Opacity = 0;
             SplashWindow.progressRect.Opacity = 0;
@@ -187,7 +190,7 @@ namespace AramisStarter
             }
 
         internal static void SetNewVersionDownloadingStatus( bool isUpdateDownloadingNow )
-            {  
+            {
             System.Windows.Application.Current.Dispatcher.Invoke( new Action( () => SplashWindow.newVersionDownloadingNotifying.Visibility = isUpdateDownloadingNow ? Visibility.Visible : Visibility.Hidden ) );
             }
 
