@@ -20,13 +20,13 @@ namespace AramisStarter.Utils
 
         private static readonly List<string> SYSTEM_TABLES = new List<string>() { "master", "model", "msdb", "tempdb" };
 
-        private static string SecureToStr( SecureString str )
+        private static string SecureToStr(SecureString str)
             {
             IntPtr ptr = new IntPtr();
-            ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR( str );
-            string result = System.Runtime.InteropServices.Marshal.PtrToStringBSTR( ptr );
+            ptr = System.Runtime.InteropServices.Marshal.SecureStringToBSTR(str);
+            string result = System.Runtime.InteropServices.Marshal.PtrToStringBSTR(ptr);
 
-            System.Runtime.InteropServices.Marshal.ZeroFreeBSTR( ptr );
+            System.Runtime.InteropServices.Marshal.ZeroFreeBSTR(ptr);
             return result;
             }
 
@@ -34,54 +34,54 @@ namespace AramisStarter.Utils
 
         #region public
 
-        internal static string GetConnectionString( string serverName, string database = null )
+        internal static string GetConnectionString(string serverName, string database = null)
             {
-            return string.Format( @"Data Source=""{0}"";{1} User ID=""{2}""; Password=""{3}""",
+            return string.Format(@"Data Source=""{0}"";{1} User ID=""{2}""; Password=""{3}""",
                 serverName,
-                database == null ? "" : string.Format( @" Initial Catalog=""{0}"";", database ),
+                database == null ? "" : string.Format(@" Initial Catalog=""{0}"";", database),
                 ARAMIS_GUEST_ID,
-                ARAMIS_GUEST_CRED );
+                ARAMIS_GUEST_CRED);
             }
 
         internal static SqlConnection GetGuestConnection()
             {
-            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( GetConnectionString( App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName ) );
+            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder(GetConnectionString(App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName));
             connStrBuilder.ConnectTimeout = 1;
-            return new SqlConnection( connStrBuilder.ConnectionString );
+            return new SqlConnection(connStrBuilder.ConnectionString);
             }
 
         internal static SqlConnection GetUpdateConnection()
             {
-            return new SqlConnection( GetConnectionString( App.SelectedSolution.SqlServerName, UpdateDatabaseName ) );
+            return new SqlConnection(GetConnectionString(App.SelectedSolution.SqlServerName, UpdateDatabaseName));
             }
 
-        internal static bool CheckPassword( string userId, SecureString securePassword )
+        internal static bool CheckPassword(string userId, SecureString securePassword)
             {
             try
                 {
-                using ( SqlConnection conn = GetGuestConnection() )
+                using (SqlConnection conn = GetGuestConnection())
                     {
                     conn.Open();
                     //conn.Close();
                     //return true;
 
-                    using ( SqlCommand cmd = new SqlCommand( "Registration", conn ) )
+                    using (SqlCommand cmd = new SqlCommand("Registration", conn))
                         {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         Guid sessionId = System.Guid.NewGuid();
-                        cmd.Parameters.AddWithValue( "@SessionId", sessionId );
-                        cmd.Parameters.AddWithValue( "@Login", userId );
-                        cmd.Parameters.AddWithValue( "@Password", GetPasswordHash( securePassword ) );
+                        cmd.Parameters.AddWithValue("@SessionId", sessionId);
+                        cmd.Parameters.AddWithValue("@Login", userId);
+                        cmd.Parameters.AddWithValue("@Password", GetPasswordHash(securePassword));
 
-                        SqlParameter resultParameter = new SqlParameter( "@UserId", DbType.Int64 );
+                        SqlParameter resultParameter = new SqlParameter("@UserId", DbType.Int64);
                         resultParameter.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add( resultParameter );
+                        cmd.Parameters.Add(resultParameter);
 
                         cmd.ExecuteNonQuery();
                         object resultObj = resultParameter.Value;
 
                         long id = -1;
-                        bool correctResult = ( resultObj != null ) && Int64.TryParse( resultObj.ToString(), out id );
+                        bool correctResult = (resultObj != null) && Int64.TryParse(resultObj.ToString(), out id);
 
                         bool result = correctResult && id > 0;
 
@@ -89,24 +89,24 @@ namespace AramisStarter.Utils
                         }
                     }
                 }
-            catch ( Exception exp )
+            catch (Exception exp)
                 {
-                Trace.WriteLine( exp.Message );
+                Trace.WriteLine(exp.Message);
                 }
 
             return false;
             }
 
-        internal static string GetPasswordHash( SecureString str )
+        internal static string GetPasswordHash(SecureString str)
             {
             System.Security.Cryptography.MD5CryptoServiceProvider MD5CryptoProvider = new System.Security.Cryptography.MD5CryptoServiceProvider();
-            byte[] data = MD5CryptoProvider.ComputeHash( System.Text.Encoding.ASCII.GetBytes( ( SecureToStr( str ) ) ) );
-            string HashResult = System.Text.Encoding.ASCII.GetString( data );
+            byte[] data = MD5CryptoProvider.ComputeHash(System.Text.Encoding.ASCII.GetBytes((SecureToStr(str))));
+            string HashResult = System.Text.Encoding.ASCII.GetString(data);
 
             return HashResult.Trim();
             }
 
-        internal static bool WriteQuickStart( Guid g, byte[] b )
+        internal static bool WriteQuickStart(Guid g, byte[] b)
             {
             #region Query text
 
@@ -129,30 +129,30 @@ select 1 ok;
             try
                 {
                 conn.Open();
-                using ( SqlCommand cmd = new SqlCommand( queryText, conn ) )
+                using (SqlCommand cmd = new SqlCommand(queryText, conn))
                     {
-                    cmd.Parameters.AddWithValue( "@G", g );
-                    cmd.Parameters.AddWithValue( "@QuickInfo", b );
+                    cmd.Parameters.AddWithValue("@G", g);
+                    cmd.Parameters.AddWithValue("@QuickInfo", b);
                     object result = cmd.ExecuteScalar();
 
-                    return result != null && Convert.ToInt32( result ) == 1;
+                    return result != null && Convert.ToInt32(result) == 1;
                     }
                 }
-            catch ( Exception exp )
+            catch (Exception exp)
                 {
-                System.Windows.MessageBox.Show( string.Format( "Не удалось сохранить пароль: {0}", exp.Message ) );
+                System.Windows.MessageBox.Show(string.Format("Не удалось сохранить пароль: {0}", exp.Message));
                 return false;
                 }
             finally
                 {
-                if ( conn != null )
+                if (conn != null)
                     {
-                    ( ( IDisposable )conn ).Dispose();
+                    ((IDisposable)conn).Dispose();
                     }
                 }
             }
 
-        internal static bool ReadQuickStart( Guid g, out byte[] b )
+        internal static bool ReadQuickStart(Guid g, out byte[] b)
             {
             String queryText = @"select Top 1 [QuickInfo] FROM [QuickStart] where [G] = @G";
 
@@ -160,38 +160,38 @@ select 1 ok;
             try
                 {
                 conn.Open();
-                using ( SqlCommand cmd = new SqlCommand( queryText, conn ) )
+                using (SqlCommand cmd = new SqlCommand(queryText, conn))
                     {
-                    cmd.Parameters.AddWithValue( "@G", g );
+                    cmd.Parameters.AddWithValue("@G", g);
                     object result = cmd.ExecuteScalar();
-                    b = ( byte[] )result;
+                    b = (byte[])result;
                     }
                 }
             catch
                 {
-                b = new byte[ 0 ];
+                b = new byte[0];
                 }
             finally
                 {
-                if ( conn != null )
+                if (conn != null)
                     {
-                    ( ( IDisposable )conn ).Dispose();
+                    ((IDisposable)conn).Dispose();
                     }
                 }
 
             return b != null && b.Length > 0;
             }
 
-        internal static void EraseQuickStart( Guid id )
+        internal static void EraseQuickStart(Guid id)
             {
             String queryText = @" delete FROM [QuickStart] where [G] = @G";
 
-            using ( SqlConnection conn = GetGuestConnection() )
+            using (SqlConnection conn = GetGuestConnection())
                 {
                 conn.Open();
-                using ( SqlCommand cmd = new SqlCommand( queryText, conn ) )
+                using (SqlCommand cmd = new SqlCommand(queryText, conn))
                     {
-                    cmd.Parameters.AddWithValue( "@G", id );
+                    cmd.Parameters.AddWithValue("@G", id);
                     cmd.ExecuteNonQuery();
                     }
                 }
@@ -205,11 +205,11 @@ select 1 ok;
             try
                 {
                 conn.Open();
-                using ( SqlCommand cmd = new SqlCommand( queryText, conn ) )
+                using (SqlCommand cmd = new SqlCommand(queryText, conn))
                     {
-                    cmd.Parameters.AddWithValue( "@SolutionName", string.Format( "{0}.{1}", App.SelectedSolution.SolutionName, App.SelectedSolution.SqlBaseName ).ToLower() );
+                    cmd.Parameters.AddWithValue("@SolutionName", string.Format("{0}.{1}", App.SelectedSolution.SolutionName, App.SelectedSolution.SqlBaseName).ToLower());
                     object result = cmd.ExecuteScalar();
-                    bool can_tStart = Convert.ToInt32( result ) > 0;
+                    bool can_tStart = Convert.ToInt32(result) > 0;
 
                     return can_tStart;
                     }
@@ -220,25 +220,25 @@ select 1 ok;
                 }
             finally
                 {
-                if ( conn != null )
+                if (conn != null)
                     {
-                    ( ( IDisposable )conn ).Dispose();
+                    ((IDisposable)conn).Dispose();
                     }
                 }
             }
 
-        internal static List<SolutionInfo> GetDatabasesList( string serverName, out string errorMessage )
+        internal static List<SolutionInfo> GetDatabasesList(string serverName, out string errorMessage)
             {
             errorMessage = null;
             List<string> databases = new List<string>();
 
-            using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverName, "master" ) ) )
+            using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString(serverName, "master")))
                 {
                 try
                     {
                     conn.Open();
                     }
-                catch ( Exception exp )
+                catch (Exception exp)
                     {
                     errorMessage = "Не обнаружен сервер";
                     return null;
@@ -246,25 +246,25 @@ select 1 ok;
 
                 try
                     {
-                    using ( SqlCommand cmd = new SqlCommand( "select RTRIM([Name]) DatabaseName from sys.databases order by DatabaseName", conn ) )
+                    using (SqlCommand cmd = new SqlCommand("select RTRIM([Name]) DatabaseName from sys.databases order by DatabaseName", conn))
                         {
-                        using ( SqlDataReader reader = cmd.ExecuteReader() )
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                             {
-                            while ( reader.Read() )
+                            while (reader.Read())
                                 {
-                                string databaseName = reader[ 0 ] as string;
-                                if ( !SYSTEM_TABLES.Contains( databaseName.ToLower() ) )
+                                string databaseName = reader[0] as string;
+                                if (!SYSTEM_TABLES.Contains(databaseName.ToLower()))
                                     {
-                                    databases.Add( databaseName );
+                                    databases.Add(databaseName);
                                     }
 
                                 }
                             }
                         }
                     }
-                catch ( Exception exp )
+                catch (Exception exp)
                     {
-                    Trace.WriteLine( exp.Message );
+                    Trace.WriteLine(exp.Message);
                     errorMessage = "Не удалось получить список информационных баз";
                     return null;
                     }
@@ -273,71 +273,71 @@ select 1 ok;
             List<SolutionInfo> result = new List<SolutionInfo>();
             SolutionInfo solutionInfo;
 
-            databases.ForEach( databaseName =>
+            databases.ForEach(databaseName =>
                 {
                     //if ( ReadSolutionInfo( serverName, databaseName, out solutionInfo ) )
                     //  {
-                    result.Add( new SolutionInfo() { SqlServerName = serverName, SqlBaseName = databaseName } );
+                    result.Add(new SolutionInfo() { SqlServerName = serverName, SqlBaseName = databaseName });
                     //  }
-                } );
+                });
 
             return result;
             }
 
         #endregion
 
-        internal static bool ReadSolutionInfo( string serverName, string databaseName, out SolutionInfo solutionInfo )
+        internal static bool ReadSolutionInfo(string serverName, string databaseName, out SolutionInfo solutionInfo)
             {
             solutionInfo = null;
 
-            if ( string.IsNullOrEmpty( serverName ) || string.IsNullOrEmpty( databaseName ) )
+            if (string.IsNullOrEmpty(serverName) || string.IsNullOrEmpty(databaseName))
                 {
                 return false;
                 }
 
-            string systemNameInfo = GetSolutionNameInfo( serverName, databaseName );
-            if ( systemNameInfo == null )
+            string systemNameInfo = GetSolutionNameInfo(serverName, databaseName);
+            if (systemNameInfo == null)
                 {
                 return false;
                 }
 
             solutionInfo = new SolutionInfo() { SqlServerName = serverName, SqlBaseName = databaseName };
-            return SetSolutionName( solutionInfo, systemNameInfo );
+            return SetSolutionName(solutionInfo, systemNameInfo);
             }
 
-        private static bool SetSolutionName( SolutionInfo solutionInfo, string systemNameInfo )
+        private static bool SetSolutionName(SolutionInfo solutionInfo, string systemNameInfo)
             {
-            int separatorIndex = systemNameInfo.IndexOf( ';' );
+            int separatorIndex = systemNameInfo.IndexOf(';');
 
-            if ( separatorIndex <= 0 )
+            if (separatorIndex <= 0)
                 {
                 return false;
                 }
             else
                 {
-                solutionInfo.SolutionName = systemNameInfo.Substring( 0, separatorIndex ).Trim();
-                solutionInfo.SolutionFriendlyName = systemNameInfo.Substring( separatorIndex + 1, systemNameInfo.Length - ( separatorIndex + 1 ) ).Trim();
+                solutionInfo.SolutionName = systemNameInfo.Substring(0, separatorIndex).Trim();
+                solutionInfo.SolutionFriendlyName = systemNameInfo.Substring(separatorIndex + 1, systemNameInfo.Length - (separatorIndex + 1)).Trim();
                 return solutionInfo.SolutionName.Length > 0;
                 }
             }
 
-        private static string GetSolutionNameInfo( string serverName, string databaseName )
+        private static string GetSolutionNameInfo(string serverName, string databaseName)
             {
             try
                 {
-                using ( SqlConnection conn = new SqlConnection( DatabaseHelper.GetConnectionString( serverName, databaseName ) ) )
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString(serverName, databaseName)))
                     {
                     conn.Open();
-                    using ( SqlCommand cmd = new SqlCommand( "select dbo.GetAramisSystemName()", conn ) )
+                    using (SqlCommand cmd = new SqlCommand("select dbo.GetAramisSystemName()", conn))
                         {
                         string result = cmd.ExecuteScalar() as string;
                         return result;
                         }
                     }
                 }
-            catch ( Exception exp )
+            catch (Exception exp)
                 {
-                Trace.WriteLine( @"Error of ""select dbo.GetAramisSystemName()"" - " + exp.Message );
+                Trace.WriteLine(@"Error of ""select dbo.GetAramisSystemName()"" - " + exp.Message);
                 return null;
                 }
             }
@@ -346,7 +346,7 @@ select 1 ok;
             {
             get
                 {
-                return updateDatabaseName ?? ( updateDatabaseName = GetDatabaseName() );
+                return updateDatabaseName ?? (updateDatabaseName = GetDatabaseName());
                 }
             }
 
@@ -354,28 +354,35 @@ select 1 ok;
 
         private static string GetDatabaseName()
             {
-            if ( TryToOpenConnection( OLD_DATABASE_NAME ) )
+            if (TryToOpenConnection(App.SelectedSolution.SqlBaseName + "Update"))
                 {
-                return OLD_DATABASE_NAME;
+                return App.SelectedSolution.SqlBaseName + "Update";
                 }
             else
                 {
-                return App.SelectedSolution.SqlBaseName + "Update";
+                return OLD_DATABASE_NAME;
                 }
 
             }
 
-        private static bool TryToOpenConnection( string databaseName )
+        private static bool TryToOpenConnection(string databaseName)
             {
-            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder( GetConnectionString( App.SelectedSolution.SqlServerName, databaseName ) );
+            SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder(GetConnectionString(App.SelectedSolution.SqlServerName, databaseName));
             connStrBuilder.ConnectTimeout = 1;
 
-            using ( SqlConnection conn = new SqlConnection( connStrBuilder.ConnectionString ) )
+            using (SqlConnection conn = new SqlConnection(connStrBuilder.ConnectionString))
                 {
                 try
                     {
                     conn.Open();
-                    return conn.State == ConnectionState.Open;
+                    if (conn.State == ConnectionState.Open)
+                        {
+                        using (SqlCommand cmd = new SqlCommand(string.Format("select count(*) from {0}Update", App.SelectedSolution.SolutionName), conn))
+                            {
+                            long result = Convert.ToInt64(cmd.ExecuteScalar());
+                            return result > 0;
+                            }
+                        }
                     }
                 catch { }
                 }

@@ -1,0 +1,18 @@
+﻿<Window x:Class="WpfApplication1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded_1">
+    <Canvas>
+        <PasswordBox Width="200" x:Name="passw"></PasswordBox>
+        <Button Content="Button" HorizontalAlignment="Left" Height="43" VerticalAlignment="Top" Width="164" Click="Button_Click_1" Canvas.Left="19" Canvas.Top="37"/>
+        <ProgressBar Height="23" Canvas.Top="289" Width="509" Value="100" Opacity="0.5" Background="{x:Null}" BorderThickness="0" >
+            <ProgressBar.Foreground>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF3477D8" Offset="0"/>
+                    <GradientStop Color="#FF0C63E0" Offset="1"/>
+                </LinearGradientBrush>
+            </ProgressBar.Foreground>
+        </ProgressBar>
+        <ProgressBar Height="23" Canvas.Top="289" Width="347" Value="100" Background="{x:Null}" BorderThickness="0"/>
+    </Canvas>
+</Window>
