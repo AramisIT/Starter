@@ -32,6 +32,13 @@
     </Window.Resources>
     <!--Background="#699F"-->
     <Grid  ShowGridLines="False" Visibility="Visible">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="/PresentationFramework.Aero, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, ProcessorArchitecture=MSIL;component/themes/aero.normalcolor.xaml"/>
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </Grid.Resources>
         <Grid.Background>
             <SolidColorBrush Color="#0000"/>
         </Grid.Background>

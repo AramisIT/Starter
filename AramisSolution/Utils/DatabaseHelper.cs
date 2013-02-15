@@ -46,7 +46,7 @@ namespace AramisStarter.Utils
         internal static SqlConnection GetGuestConnection()
             {
             SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder(GetConnectionString(App.SelectedSolution.SqlServerName, App.SelectedSolution.SqlBaseName));
-            connStrBuilder.ConnectTimeout = 1;
+            connStrBuilder.ConnectTimeout = 20;
             return new SqlConnection(connStrBuilder.ConnectionString);
             }
 

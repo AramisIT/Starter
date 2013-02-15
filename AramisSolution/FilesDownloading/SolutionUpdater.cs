@@ -551,6 +551,13 @@ namespace AramisStarter.FilesDownloading
             return true;
             }
 
+        /// <summary>
+        /// В запросе сам файл должен выбираться в последнем столбце
+        /// </summary>
+        /// <param name="filePath">Full file name</param>
+        /// <param name="fileSize">File size</param>
+        /// <param name="dataReader">Созданный риадер с параметром CommandBehavior.SequentialAccess</param>
+        /// <returns></returns>
         private static bool SaveTemporaryFile(string filePath, long fileSize, SqlDataReader dataReader)
             {
             FileStream file;

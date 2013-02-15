@@ -125,11 +125,28 @@ namespace AramisStarter
         /// </summary>
         private static string solutionsPath;
 
+        private static bool releaseMode = IsReleaseMode();
+        private static bool IsReleaseMode()
+            {
+            bool isReleaseMode = true;
+#if DEBUG
+            isReleaseMode = false;
+#endif
+            return isReleaseMode;
+            }
+
         private static void InitWithSelectedSolution()
             {
             string fullSolutionName = SelectedSolution.BuildFullSolutionName();
 
-            SolutionDirPath = string.Format( @"{0}\Aramis .NET\{1}\", Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ), fullSolutionName );
+            if (releaseMode)
+                {
+                SolutionDirPath = string.Format(@"{0}\Aramis .NET\{1}\", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), fullSolutionName);
+                }
+            else
+                {
+                SolutionDirPath = @"..\..\..\..\GreenHouse\GreenHouse\bin\Release\";
+                }
 
             RegistryHelper.Init( fullSolutionName );
 
