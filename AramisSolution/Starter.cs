@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows;
 using AramisStarter.FilesDownloading;
 using AramisStarter.Utils;
+using System.IO;
 
 namespace AramisStarter
     {
@@ -51,8 +52,8 @@ namespace AramisStarter
 
         private static Mutex GetRunMutex()
             {
-            string mutexName = string.Format( "START_Aramis.Net_{0}", App.SelectedSolution.BuildFullSolutionName() );
-            return new Mutex( false, mutexName );
+            string mutexName = string.Format("START_Aramis.Net_{0}", App.SelectedSolution.BuildFullSolutionName());
+            return new Mutex(false, mutexName);
             }
 
         #endregion
@@ -72,7 +73,7 @@ namespace AramisStarter
 
         #region constructor
 
-        private Starter( SolutionInfo solutionInfo )
+        private Starter(SolutionInfo solutionInfo)
             {
             solution = solutionInfo;
 
@@ -83,9 +84,9 @@ namespace AramisStarter
 
         private void StartExecutorThread()
             {
-            solutionThread = new Thread( SolutionExecutorMethod );
+            solutionThread = new Thread(SolutionExecutorMethod);
             solutionThread.Name = "Solution executor";
-            solutionThread.SetApartmentState( ApartmentState.STA );
+            solutionThread.SetApartmentState(ApartmentState.STA);
             solutionThread.Start();
             }
 
@@ -93,21 +94,21 @@ namespace AramisStarter
 
         private void InitSolutionDomain()
             {
-            solutionDomain = AppDomain.CreateDomain( "Solution domain", null, new AppDomainSetup
+            solutionDomain = AppDomain.CreateDomain("Solution domain", null, new AppDomainSetup
             {
-                ApplicationBase = App.SolutionDirPath.Substring( 0, App.SolutionDirPath.Length - 1 ),
+                ApplicationBase = App.SolutionDirPath.Substring(0, App.SolutionDirPath.Length - 1),
                 ConfigurationFile = solutionExecutiveFileName + ".config"
-            } );
+            });
 
-            solutionDomain.SetData( LOADED_STR, false );
+            solutionDomain.SetData(LOADED_STR, false);
 
-            solutionDomain.SetData( SERVER_NAME_STR, App.SelectedSolution.SqlServerName );
-            solutionDomain.SetData( DATABASE_NAME_STR, App.SelectedSolution.SqlBaseName );
+            solutionDomain.SetData(SERVER_NAME_STR, App.SelectedSolution.SqlServerName);
+            solutionDomain.SetData(DATABASE_NAME_STR, App.SelectedSolution.SqlBaseName);
 
-            solutionDomain.SetData( USER_ID_STR, LoginWindow.UserName );
-            solutionDomain.SetData( USER_KEY_STR, Encryptor.ConvertToByte( LoginWindow.UserPassword ) );
+            solutionDomain.SetData(USER_ID_STR, LoginWindow.UserName);
+            solutionDomain.SetData(USER_KEY_STR, Encryptor.ConvertToByte(LoginWindow.UserPassword));
 
-            solutionDomain.SetData( EXECUTE_ERROR, "" );
+            solutionDomain.SetData(EXECUTE_ERROR, "");
             }
 
         private bool RegistrateInRegisrty()
@@ -115,42 +116,42 @@ namespace AramisStarter
             Process currentProcess = Process.GetCurrentProcess();
 
             string processId = currentProcess.Id.ToString();
-            string startTime = currentProcess.StartTime.ToString( DATE_TIME_FORMAT );
+            string startTime = currentProcess.StartTime.ToString(DATE_TIME_FORMAT);
 
-            RegistryHelper.ProcessesIDsRegistryKey.SetValue( processId, startTime );
+            RegistryHelper.ProcessesIDsRegistryKey.SetValue(processId, startTime);
 
             string wrotenValue;
             try
                 {
-                wrotenValue = RegistryHelper.ProcessesIDsRegistryKey.GetValue( processId ) as string;
+                wrotenValue = RegistryHelper.ProcessesIDsRegistryKey.GetValue(processId) as string;
                 return startTime == wrotenValue;
                 }
             catch
                 {
-                solutionDomain.SetData( EXECUTE_ERROR, "Can't registrate process in registry" );
+                solutionDomain.SetData(EXECUTE_ERROR, "Can't registrate process in registry");
                 return false;
                 }
             }
 
         private bool RegistrateSolutionExecuting()
             {
-            SyncHelper.EnterMutex( RunSolutionMutex );
+            SyncHelper.EnterMutex(RunSolutionMutex);
 
             solutionExecuting = true;
 
-            if ( !RegistrateInRegisrty() )
+            if (!RegistrateInRegisrty())
                 {
-                SyncHelper.ExitMutex( RunSolutionMutex );
+                SyncHelper.ExitMutex(RunSolutionMutex);
                 Splash.SplashWindow.HideWindow();
-                MessageBox.Show( "Не удается получить доступ к реестру. Обратитесь к системному администратору для получения прав.\r\n\r\nВетвь: " + RegistryHelper.RegistryMainNodeName,
+                MessageBox.Show("Не удается получить доступ к реестру. Обратитесь к системному администратору для получения прав.\r\n\r\nВетвь: " + RegistryHelper.RegistryMainNodeName,
                     "Aramis.NET",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error );
+                    MessageBoxImage.Error);
                 errorStart = true;
                 return false;
                 }
 
-            SyncHelper.ExitMutex( RunSolutionMutex );
+            SyncHelper.ExitMutex(RunSolutionMutex);
 
             return true;
             }
@@ -162,7 +163,7 @@ namespace AramisStarter
             string processId = currentProcess.Id.ToString();
             try
                 {
-                RegistryHelper.ProcessesIDsRegistryKey.DeleteValue( processId );
+                RegistryHelper.ProcessesIDsRegistryKey.DeleteValue(processId);
                 }
             catch
             { }
@@ -170,7 +171,7 @@ namespace AramisStarter
             solutionExecuting = false;
             }
 
-        private void SafetySetDomainData( string varName, object newUpdateDownloaded )
+        private void SafetySetDomainData(string varName, object newUpdateDownloaded)
             {
             bool valueSetted;
             do
@@ -178,22 +179,22 @@ namespace AramisStarter
                 valueSetted = true;
                 try
                     {
-                    solutionDomain.SetData( varName, newUpdateDownloaded );
+                    solutionDomain.SetData(varName, newUpdateDownloaded);
                     }
                 catch
                     {
                     valueSetted = false;
-                    Thread.Sleep( 100 );
+                    Thread.Sleep(100);
                     }
-                } while ( !valueSetted );
+                } while (!valueSetted);
             }
 
-        private bool ExecuteSolution( out bool exitForUpdate, out bool forsedUpdate )
+        private bool ExecuteSolution(out bool exitForUpdate, out bool forsedUpdate)
             {
             exitForUpdate = false;
             forsedUpdate = false;
 
-            if ( !RegistrateSolutionExecuting() )
+            if (!RegistrateSolutionExecuting())
                 {
                 return false;
                 }
@@ -203,23 +204,30 @@ namespace AramisStarter
 
             try
                 {
-                solutionDomain.ExecuteAssembly( solutionExecutiveFileName );
-                Log.Append( "Executed - OK" );
+                solutionDomain.ExecuteAssembly(solutionExecutiveFileName);
+                Log.Append("Executed - OK");
                 }
-            catch ( ThreadAbortException abortExp )
+            catch (ThreadAbortException abortExp)
                 {
-                Log.Append( "Executing ThreadAbortException - " + abortExp.Message );
+                Log.Append("Executing ThreadAbortException - " + abortExp.Message);
                 App.Stop();
                 return false;
                 }
 
-            catch ( Exception exp )
+            catch (Exception exp)
                 {
-                Log.Append( "Executing exception - " + exp.Message );
-                executionError = string.Format( "ExecuteAssembly error: {0}", exp.Message );
-                Trace.WriteLine( executionError );
+                Log.Append("Executing exception - " + exp.Message);
+                executionError = string.Format("ExecuteAssembly error: {0}", exp.Message);
+                Trace.WriteLine(executionError);
 
-                if ( ExecutingTimeUnreallySmall( startTime ) )
+                string fileName = Path.GetDirectoryName(SolutionUpdater.STARTER_PATH) + "\\" + "lastError.txt";
+                try
+                    {
+                    File.WriteAllText(fileName, exp.Message + "\r\n" + exp.StackTrace);
+                    }
+                catch { }
+
+                if (ExecutingTimeUnreallySmall(startTime))
                     {
                     SolutionUpdater.ResetVersion();
                     // tell to updater to updateVersion
@@ -227,26 +235,26 @@ namespace AramisStarter
                     }
                 }
 
-            while ( solutionDomain.GetData( EXIT_STATUS_VAR_NAME ) == null )
+            while (solutionDomain.GetData(EXIT_STATUS_VAR_NAME) == null)
                 {
-                Thread.Sleep( WAIT_FOR_THREADS_COMPLATING_INTERVAL_MILLISEC );
+                Thread.Sleep(WAIT_FOR_THREADS_COMPLATING_INTERVAL_MILLISEC);
                 }
 
             GC.WaitForPendingFinalizers();
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            object exitForUpdateObj = solutionDomain.GetData( UPDATE_MODE_VAR_NAME );
-            object forsedUpdateObj = solutionDomain.GetData( FORSED_UPDATE_VAR_NAME );
+            object exitForUpdateObj = solutionDomain.GetData(UPDATE_MODE_VAR_NAME);
+            object forsedUpdateObj = solutionDomain.GetData(FORSED_UPDATE_VAR_NAME);
 
             try
                 {
-                Log.Append( "before domain unload" );
-                AppDomain.Unload( solutionDomain );
-                Log.Append( "domain unloaded" );
+                Log.Append("before domain unload");
+                AppDomain.Unload(solutionDomain);
+                Log.Append("domain unloaded");
                 }
             catch
                 {
-                Log.Append( "error domain unloaded" );
+                Log.Append("error domain unloaded");
                 return false;
                 }
 
@@ -255,23 +263,23 @@ namespace AramisStarter
             GC.WaitForPendingFinalizers();
 
             RegistrateSolutionExit();
-            Log.Append( "RegistrateSolutionExit() solutionExecuting = " + solutionExecuting.ToString() );
+            Log.Append("RegistrateSolutionExit() solutionExecuting = " + solutionExecuting.ToString());
 
-            exitForUpdate = ( exitForUpdateObj != null ) && ( exitForUpdateObj is bool ) && ( bool )exitForUpdateObj;
-            forsedUpdate = ( forsedUpdateObj != null ) && ( forsedUpdateObj is bool ) && ( bool )forsedUpdateObj;
-            Log.Append( "exit ExecuteSolution" );
+            exitForUpdate = (exitForUpdateObj != null) && (exitForUpdateObj is bool) && (bool)exitForUpdateObj;
+            forsedUpdate = (forsedUpdateObj != null) && (forsedUpdateObj is bool) && (bool)forsedUpdateObj;
+            Log.Append("exit ExecuteSolution");
             return true;
             }
 
         private bool WaitForPermissionToStart()
             {
             DateTime startTime = DateTime.Now;
-            while ( DatabaseHelper.IsDatabaseUpdating() )
+            while (DatabaseHelper.IsDatabaseUpdating())
                 {
-                Thread.Sleep( WAIT_FOT_DATABASE_UPDATE_INTERVAL_SEC * 1000 );
+                Thread.Sleep(WAIT_FOT_DATABASE_UPDATE_INTERVAL_SEC * 1000);
 
-                int totalSec = ( int )( ( TimeSpan )( DateTime.Now - startTime ) ).TotalSeconds;
-                if ( totalSec > MAX_TIME_FOR_DB_UPDATING_SEC )
+                int totalSec = (int)((TimeSpan)(DateTime.Now - startTime)).TotalSeconds;
+                if (totalSec > MAX_TIME_FOR_DB_UPDATING_SEC)
                     {
                     return false;
                     }
@@ -280,39 +288,39 @@ namespace AramisStarter
             return true;
             }
 
-        private static bool ExecutingTimeUnreallySmall( DateTime startTime )
+        private static bool ExecutingTimeUnreallySmall(DateTime startTime)
             {
-            int executingTimeSec = ( int )( ( TimeSpan )( DateTime.Now - startTime ) ).TotalSeconds;
+            int executingTimeSec = (int)((TimeSpan)(DateTime.Now - startTime)).TotalSeconds;
             return executingTimeSec < EXECUTING_TIME_SEC;
             }
 
-        private void SolutionExecutorMethod( object state )
+        private void SolutionExecutorMethod(object state)
             {
             bool exit = false;
 
             do
                 {
-                if ( SolutionUpdater.ReadyToRun && LoginWindow.Authorized )
+                if (SolutionUpdater.ReadyToRun && LoginWindow.Authorized)
                     {
-                    if ( !WaitForPermissionToStart() )
+                    if (!WaitForPermissionToStart())
                         {
                         return;
                         }
 
                     bool exitForUpdate, forsedUpdate;
-                    exit = !ExecuteSolution( out exitForUpdate, out forsedUpdate ) || !exitForUpdate;
+                    exit = !ExecuteSolution(out exitForUpdate, out forsedUpdate) || !exitForUpdate;
 
-                    if ( exitForUpdate )
+                    if (exitForUpdate)
                         {
-                        SolutionUpdater.MakeToUpdate( forsedUpdate );
+                        SolutionUpdater.MakeToUpdate(forsedUpdate);
                         }
                     }
                 else
                     {
-                    Thread.Sleep( WAIT_FOR_RUN_INTERVAL_MILLISEC );
+                    Thread.Sleep(WAIT_FOR_RUN_INTERVAL_MILLISEC);
                     }
                 }
-            while ( !exit );
+            while (!exit);
 
             App.Stop();
             }
@@ -332,7 +340,7 @@ namespace AramisStarter
             {
             get
                 {
-                if ( !starterInitialized )
+                if (!starterInitialized)
                     {
                     return false;
                     }
@@ -350,7 +358,7 @@ namespace AramisStarter
             {
             get
                 {
-                if ( !starterInitialized || !solutionExecuting )
+                if (!starterInitialized || !solutionExecuting)
                     {
                     return false;
                     }
@@ -359,7 +367,7 @@ namespace AramisStarter
                     bool solutionLoaded = false;
                     try
                         {
-                        solutionLoaded = ( bool )starter.solutionDomain.GetData( LOADED_STR );
+                        solutionLoaded = (bool)starter.solutionDomain.GetData(LOADED_STR);
                         }
                     catch { }
 
@@ -386,7 +394,7 @@ namespace AramisStarter
             {
             get
                 {
-                if ( !starterInitialized )
+                if (!starterInitialized)
                     {
                     return false;
                     }
@@ -400,11 +408,11 @@ namespace AramisStarter
         /// <summary>
         /// Выполняет единоразовую инициализацию, создает приватный экземпляр класса
         /// </summary>
-        internal static void Init( SolutionInfo solution )
+        internal static void Init(SolutionInfo solution)
             {
-            if ( !starterInitialized )
+            if (!starterInitialized)
                 {
-                starter = new Starter( solution );
+                starter = new Starter(solution);
                 starterInitialized = true;
                 }
             }
@@ -412,20 +420,20 @@ namespace AramisStarter
         /// <summary>
         /// Сообщить приложению про доступность обновления и его версию
         /// </summary>
-        internal static void SetUpdateExistingStatus( bool newUpdateDownloaded, int version = 0 )
+        internal static void SetUpdateExistingStatus(bool newUpdateDownloaded, int version = 0)
             {
-            if ( !starterInitialized )
+            if (!starterInitialized)
                 {
                 return;
                 }
 
-            if ( solutionExecuting && starter.solutionDomain != null )
+            if (solutionExecuting && starter.solutionDomain != null)
                 {
-                starter.SafetySetDomainData( UPDATE_EXISTS_VAR_NAME, newUpdateDownloaded );
+                starter.SafetySetDomainData(UPDATE_EXISTS_VAR_NAME, newUpdateDownloaded);
 
-                if ( newUpdateDownloaded )
+                if (newUpdateDownloaded)
                     {
-                    starter.SafetySetDomainData( UPDATE_VERSION_VAR_NAME, version );
+                    starter.SafetySetDomainData(UPDATE_VERSION_VAR_NAME, version);
                     }
                 }
             }

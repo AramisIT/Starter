@@ -43,7 +43,7 @@ namespace AramisStarter.FilesDownloading
 
         private const int CHECK_FOR_STARTER_UPDATE_INTERVAL_MINUTES = 30;
         private DateTime lastCheckingForStarterUpdateTime = DateTime.Now.AddDays(-1);
-        private static readonly string STARTER_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Aramis .NET\Starter\" + Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        public static readonly string STARTER_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Aramis .NET\Starter\" + Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         private static readonly string STARTER_HASH = GetFileHash(STARTER_PATH);
         private static readonly string UPDATE_STARTER_PATH = string.Format(@"{0}\Update\{1}", Path.GetDirectoryName(STARTER_PATH), Path.GetFileName(STARTER_PATH));
         private static string GetUpdateStarterHash()

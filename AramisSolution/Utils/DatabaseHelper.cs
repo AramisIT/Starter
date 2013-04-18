@@ -368,7 +368,7 @@ select 1 ok;
         private static bool TryToOpenConnection(string databaseName)
             {
             SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder(GetConnectionString(App.SelectedSolution.SqlServerName, databaseName));
-            connStrBuilder.ConnectTimeout = 1;
+            connStrBuilder.ConnectTimeout = 20;
 
             using (SqlConnection conn = new SqlConnection(connStrBuilder.ConnectionString))
                 {

@@ -129,7 +129,7 @@ namespace AramisStarter
         private static bool IsReleaseMode()
             {
             bool isReleaseMode = true;
-#if DEBUG
+#if Debug
             isReleaseMode = false;
 #endif
             return isReleaseMode;
@@ -207,7 +207,7 @@ namespace AramisStarter
                 }
 
 
-            Log.Testing = ( new List<string>() { "db", "atos", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
+            Log.Testing = ( new List<string>() { "---utk-server1", "-atosit", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
 
             if ( Thread.CurrentThread.Name == null )
                 {
