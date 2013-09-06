@@ -59,6 +59,9 @@
       <DependentUpon>AddNewSystemWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddingDatabaseForStarterUpdate\App.cs" />
+    <Compile Include="ConnectionTestingWindow.xaml.cs">
+      <DependentUpon>ConnectionTestingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DatabaseHelper.cs" />
     <Compile Include="StarterUpdateDatabasePath.cs" />
     <Compile Include="StarterUpdater.cs" />
@@ -96,6 +99,10 @@
     <Page Include="AddingDatabaseForStarterUpdate\AddNewSystemWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ConnectionTestingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup />

@@ -34,22 +34,22 @@ namespace AramisStarter
             private set;
             }
 
-        public AddNewSystemWindow( string starterUpdateDatabasePathInfo, string errorMessage )
+        public AddNewSystemWindow(string starterUpdateDatabasePathInfo, string errorMessage)
             {
             InitializeComponent();
-            Icon = EmbededResourcesConverter.BitmapSourceFromBitmap( AramisPreStart.Properties.Resources.transparent );
+            Icon = EmbededResourcesConverter.BitmapSourceFromBitmap(AramisPreStart.Properties.Resources.transparent);
             this.starterUpdateDatabasePathInfo = starterUpdateDatabasePathInfo;
-            
-            if ( errorMessage != null )
+
+            if (errorMessage != null)
                 {
-                SetParametersFromFile( starterUpdateDatabasePathInfo );
+                SetParametersFromFile(starterUpdateDatabasePathInfo);
                 ShowError(errorMessage);
                 }
 
             Showed = true;
             }
 
-        private void Window_Loaded_1( object sender, RoutedEventArgs e )
+        private void Window_Loaded_1(object sender, RoutedEventArgs e)
             {
             //if ( serverName != null )
             //    {
@@ -60,41 +60,60 @@ namespace AramisStarter
             //    }
             }
 
-        private void Button_Click_1( object sender, RoutedEventArgs e )
+        private void Button_Click_1(object sender, RoutedEventArgs e)
             {
             string serverName = serverNameTextBox.Text.Trim();
             string databaseName = databaseNameTextBox.Text.Trim();
-            if ( !string.IsNullOrEmpty( serverName ) && !string.IsNullOrEmpty( databaseName ) )
+
+            var colonPosition = databaseName.IndexOf(':');
+            if (colonPosition > 0 && (databaseName.Length - 1) > colonPosition)
                 {
-                SavePath( string.Format( "{0} ; {1}", serverName, databaseName ) );
+                const string ADMIN_CONNECTION_TEST_MODE_PASS = "testconnection";
+                bool adminPass = databaseName.Substring(colonPosition + 1).ToLower().Trim().Equals(ADMIN_CONNECTION_TEST_MODE_PASS);
+                if (adminPass)
+                    {
+                    var testConnectionWindow = new ConnectionTestingWindow(serverName,
+                        databaseName.Substring(0, colonPosition));
+                    testConnectionWindow.ShowDialog();
+                    }
+                else
+                    {
+                    ShowError("Неверное имя базы");
+                    }
+                return;
+                }
+
+            if (!string.IsNullOrEmpty(serverName) && !string.IsNullOrEmpty(databaseName))
+                {
+                SavePath(string.Format("{0} ; {1}", serverName, databaseName));
                 }
 
             Close();
             }
 
-        private void SavePath( string databasePath )
+        private void SavePath(string databasePath)
             {
-            using ( StreamWriter streamWriter = File.CreateText( starterUpdateDatabasePathInfo ) )
+            using (StreamWriter streamWriter = File.CreateText(starterUpdateDatabasePathInfo))
                 {
-                streamWriter.Write( databasePath );
+                streamWriter.Write(databasePath);
                 }
             }
 
-        private void serverNameTextBox_LostFocus( object sender, RoutedEventArgs e )
+        private void serverNameTextBox_LostFocus(object sender, RoutedEventArgs e)
             {
 
             }
 
-        private void ShowError( string errorMessage )
+        private void ShowError(string errorMessage)
             {
             goButton.Visibility = System.Windows.Visibility.Hidden;
             myMessage.Text = errorMessage;
             myMessage.Visibility = Visibility.Visible;
             }
 
-        private void serverNameTextBox_KeyDown( object sender, KeyEventArgs e )
+        private void serverNameTextBox_KeyDown(object sender, KeyEventArgs e)
             {
-            if ( e.Key == Key.Enter )
+            if (e.Key == Key.Enter)
                 {
                 databaseNameTextBox.Focus();
                 }
@@ -103,15 +122,15 @@ namespace AramisStarter
         private bool isSolutionRecognized;
         private string starterUpdateDatabasePathInfo;
 
-        private void databaseNameComboBox_KeyDown( object sender, KeyEventArgs e )
+        private void databaseNameComboBox_KeyDown(object sender, KeyEventArgs e)
             {
-            if ( e.Key == Key.Enter )
+            if (e.Key == Key.Enter)
                 {
 
                 }
             }
 
-        private void serverNameTextBox_TextChanged( object sender, TextChangedEventArgs e )
+        private void serverNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
             {
             HideError();
             }
@@ -123,7 +142,7 @@ namespace AramisStarter
             myMessage.Text = "";
             }
 
-        private void solutionNameTextBox_TextChanged( object sender, TextChangedEventArgs e )
+        private void solutionNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
             {
             //SolutionInfo currentSolutionInfo = getCurrentSolutionInfo();
             //if ( currentSolutionInfo != null && !solutionNameTextBox.IsReadOnly )
@@ -132,7 +151,7 @@ namespace AramisStarter
             //    }
             }
 
-        private void Button_Click_2( object sender, RoutedEventArgs e )
+        private void Button_Click_2(object sender, RoutedEventArgs e)
             {
             LoadPathFromFile();
             }
@@ -146,19 +165,19 @@ namespace AramisStarter
 
             bool? openResult = openFileDialog.ShowDialog();
 
-            if ( openResult == true && openFileDialog.FileName != null )
+            if (openResult == true && openFileDialog.FileName != null)
                 {
-                if ( !SetParametersFromFile( openFileDialog.FileName ) )
+                if (!SetParametersFromFile(openFileDialog.FileName))
                     {
-                    ShowError( string.Format( "Требуемый формат файла:\r\n<Имя сервера>;<Имя базы>", openFileDialog.FileName ) );
+                    ShowError(string.Format("Требуемый формат файла:\r\n<Имя сервера>;<Имя базы>", openFileDialog.FileName));
                     }
                 }
             }
 
-        private bool SetParametersFromFile( string fileName )
+        private bool SetParametersFromFile(string fileName)
             {
             StarterUpdateDatabasePath starterUpdateDatabasePath;
-            if ( StarterUpdateDatabasePath.ReadStarterUpdateDatabasePath( fileName, out starterUpdateDatabasePath ) )
+            if (StarterUpdateDatabasePath.ReadStarterUpdateDatabasePath(fileName, out starterUpdateDatabasePath))
                 {
                 serverNameTextBox.Text = starterUpdateDatabasePath.ServerName;
                 databaseNameTextBox.Text = starterUpdateDatabasePath.DatabaseName;
@@ -170,7 +189,7 @@ namespace AramisStarter
                 }
             }
 
-        private void databaseNameTextBox_TextChanged( object sender, TextChangedEventArgs e )
+        private void databaseNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
             {
             HideError();
             }

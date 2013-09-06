@@ -34,34 +34,34 @@ namespace AramisStarter
 
         private ObservableCollection<SolutionInfo> solutions;
 
-        internal static void SaveSolutionsList( ObservableCollection<SolutionInfo> solutions )
+        internal static void SaveSolutionsList(ObservableCollection<SolutionInfo> solutions)
             {
-            if ( solutionsPath == null )
+            if (solutionsPath == null)
                 {
                 return;
                 }
 
-            XElement doc = new XElement( ROOT_NODE_NAME );
-            doc.SetAttributeValue( DEFAULT_SOLUTION, "" );
+            XElement doc = new XElement(ROOT_NODE_NAME);
+            doc.SetAttributeValue(DEFAULT_SOLUTION, "");
 
-            foreach ( SolutionInfo solutionInfo in solutions )
+            foreach (SolutionInfo solutionInfo in solutions)
                 {
-                XElement solutionXElement = new XElement( SOLUTION_NODE );
-                solutionXElement.SetAttributeValue( NAME_ATTRIBUTE, solutionInfo.SolutionName );
-                solutionXElement.Add( new XElement( SERVER_FRIENDLY_XML_NAME, solutionInfo.SolutionFriendlyName ) );
-                solutionXElement.Add( new XElement( SQL_BASE_NAME_XML_NAME, solutionInfo.SqlBaseName ) );
-                solutionXElement.Add( new XElement( SERVER_XML_NAME, solutionInfo.SqlServerName ) );
-                doc.Add( solutionXElement );
+                XElement solutionXElement = new XElement(SOLUTION_NODE);
+                solutionXElement.SetAttributeValue(NAME_ATTRIBUTE, solutionInfo.SolutionName);
+                solutionXElement.Add(new XElement(SERVER_FRIENDLY_XML_NAME, solutionInfo.SolutionFriendlyName));
+                solutionXElement.Add(new XElement(SQL_BASE_NAME_XML_NAME, solutionInfo.SqlBaseName));
+                solutionXElement.Add(new XElement(SERVER_XML_NAME, solutionInfo.SqlServerName));
+                doc.Add(solutionXElement);
                 }
 
-            string directoryName = Path.GetDirectoryName( solutionsPath );
+            string directoryName = Path.GetDirectoryName(solutionsPath);
             try
                 {
-                if ( !Directory.Exists( directoryName ) )
+                if (!Directory.Exists(directoryName))
                     {
-                    Directory.CreateDirectory( directoryName );
+                    Directory.CreateDirectory(directoryName);
                     }
-                doc.Save( solutionsPath );
+                doc.Save(solutionsPath);
                 }
             catch
                 {
@@ -71,7 +71,7 @@ namespace AramisStarter
         private void ReadSolutions()
             {
             string xmlData = ReadSolutionsFromDisk();
-            if ( xmlData == "" )
+            if (xmlData == "")
                 {
                 solutions = new ObservableCollection<SolutionInfo>();
                 return;
@@ -80,36 +80,36 @@ namespace AramisStarter
             List<SolutionInfo> newSolutionsList = new List<SolutionInfo>();
             try
                 {
-                XElement doc = XDocument.Parse( xmlData ).Element( ROOT_NODE_NAME );
-                doc.Elements( SOLUTION_NODE ).ToList<XElement>().ForEach( solutionXElement =>
+                XElement doc = XDocument.Parse(xmlData).Element(ROOT_NODE_NAME);
+                doc.Elements(SOLUTION_NODE).ToList<XElement>().ForEach(solutionXElement =>
                     {
                         SolutionInfo solutionInfo = new SolutionInfo();
 
-                        solutionInfo.SolutionName = solutionXElement.Attribute( NAME_ATTRIBUTE ).Value;
-                        solutionInfo.SqlServerName = solutionXElement.Element( SERVER_XML_NAME ).Value;
-                        solutionInfo.SolutionFriendlyName = solutionXElement.Element( SERVER_FRIENDLY_XML_NAME ).Value;
-                        solutionInfo.SqlBaseName = solutionXElement.Element( SQL_BASE_NAME_XML_NAME ).Value;
+                        solutionInfo.SolutionName = solutionXElement.Attribute(NAME_ATTRIBUTE).Value;
+                        solutionInfo.SqlServerName = solutionXElement.Element(SERVER_XML_NAME).Value;
+                        solutionInfo.SolutionFriendlyName = solutionXElement.Element(SERVER_FRIENDLY_XML_NAME).Value;
+                        solutionInfo.SqlBaseName = solutionXElement.Element(SQL_BASE_NAME_XML_NAME).Value;
 
-                        newSolutionsList.Add( solutionInfo );
-                    } );
+                        newSolutionsList.Add(solutionInfo);
+                    });
                 }
             catch
                 {
                 newSolutionsList = new List<SolutionInfo>();
                 }
 
-            solutions = new ObservableCollection<SolutionInfo>( newSolutionsList );
+            solutions = new ObservableCollection<SolutionInfo>(newSolutionsList);
             }
 
         private string ReadSolutionsFromDisk()
             {
-            if ( File.Exists( solutionsPath ) )
+            if (File.Exists(solutionsPath))
                 {
                 try
                     {
-                    return File.ReadAllText( solutionsPath ).Trim();
+                    return File.ReadAllText(solutionsPath).Trim();
                     }
-                catch ( Exception exp )
+                catch (Exception exp)
                     {
                     return "";
                     }
@@ -148,7 +148,7 @@ namespace AramisStarter
                 SolutionDirPath = @"..\..\..\..\GreenHouse\GreenHouse\bin\Release\";
                 }
 
-            RegistryHelper.Init( fullSolutionName );
+            RegistryHelper.Init(fullSolutionName);
 
             SolutionUpdater.Init();
             }
@@ -175,30 +175,30 @@ namespace AramisStarter
             private set;
             }
 
-        public App( string solutionsPath )
+        public App(string solutionsPath)
             : base()
             {
             App.solutionsPath = solutionsPath;
             }
 
         [STAThread()]
-        static void Main( string[] args )
+        static void Main(string[] args)
             {
-            string STARTER_PATH = Environment.GetFolderPath( Environment.SpecialFolder.ApplicationData ) + @"\Aramis .NET\Starter";
+            string STARTER_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Aramis .NET\Starter";
             string solutionPath = STARTER_PATH + @"\Solutions.xml";
 
-            App app = new App( solutionPath );
-            app.Start( args );
+            App app = new App(solutionPath);
+            app.Start(args);
             }
 
-        private void Start( string[] args )
+        private void Start(string[] args)
             {
 
-            if ( ProcessHelper.GetOtherSameProcessesList( true ).Count > 0 )
+            if (ProcessHelper.GetOtherSameProcessesList(true).Count > 0)
                 {
-                if ( MessageBox.Show( "Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены", "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No ) == MessageBoxResult.Yes )
+                if (MessageBox.Show("Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены", "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes)
                     {
-                    ProcessHelper.GetOtherSameProcessesList( true ).ForEach( process => process.Kill() );
+                    ProcessHelper.GetOtherSameProcessesList(true).ForEach(process => process.Kill());
                     }
                 else
                     {
@@ -207,9 +207,9 @@ namespace AramisStarter
                 }
 
 
-            Log.Testing = ( new List<string>() { "---utk-server1", "-atosit", "donotenter" } ).Contains( System.Environment.MachineName.ToLower().Trim() );
+            Log.Testing = (new List<string>() { "---utk-server1", "-atosit", "donotenter" }).Contains(System.Environment.MachineName.ToLower().Trim());
 
-            if ( Thread.CurrentThread.Name == null )
+            if (Thread.CurrentThread.Name == null)
                 {
                 Thread.CurrentThread.Name = "Main starter thread";
                 }
@@ -220,17 +220,17 @@ namespace AramisStarter
             LoginWindow mainWindow = LoginWindow.Window;
 
             bool emptySolutionListAtStart = solutions.Count == 0;
-            if ( emptySolutionListAtStart )
+            if (emptySolutionListAtStart)
                 {
                 TryToAddDefaultSolution();
 
-                if ( solutions.Count == 0 )
+                if (solutions.Count == 0)
                     {
                     SolutionInfo newSolutionInfo = AddNewSystemWindow.AddNewSolution();
-                    if ( newSolutionInfo != null )
+                    if (newSolutionInfo != null)
                         {
-                        solutions.Add( newSolutionInfo );
-                        SaveSolutionsList( solutions );
+                        solutions.Add(newSolutionInfo);
+                        SaveSolutionsList(solutions);
                         }
                     }
                 }
@@ -239,31 +239,31 @@ namespace AramisStarter
 
             SelectedSolution = null;
 
-            if ( solutions.Count == 0 )
+            if (solutions.Count == 0)
                 {
                 return;
                 }
-            else if ( solutions.Count == 1 && !emptySolutionListAtStart && !Keyboard.IsKeyDown( Key.LeftShift ) && !Keyboard.IsKeyDown( Key.RightShift ) )
+            else if (solutions.Count == 1 && !emptySolutionListAtStart && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
                 {
-                SelectedSolution = solutions[ 0 ];
+                SelectedSolution = solutions[0];
                 }
             else
                 {
-                SolutionSelectingWindow seleectingWindow = new SolutionSelectingWindow( solutions );
+                SolutionSelectingWindow seleectingWindow = new SolutionSelectingWindow(solutions);
                 seleectingWindow.ShowDialog();
                 SelectedSolution = seleectingWindow.SelectedSolution;
                 }
 
-            if ( SelectedSolution != null )
+            if (SelectedSolution != null)
                 {
                 InitWithSelectedSolution();
 
-                if ( Log.Testing )
+                if (Log.Testing)
                     {
-                    ( new Log() ).Show();
+                    (new Log()).Show();
                     }
 
-                Run( mainWindow );
+                Run(mainWindow);
                 }
             }
 
@@ -271,21 +271,21 @@ namespace AramisStarter
             {
             SolutionInfo defaultSolution = SolutionInfo.GetDefaultSolution();
 
-            if ( defaultSolution != null )
+            if (defaultSolution != null)
                 {
-                solutions.Add( defaultSolution );
-                SaveSolutionsList( solutions );                
+                solutions.Add(defaultSolution);
+                SaveSolutionsList(solutions);
                 }
             }
 
         internal static void Stop()
             {
             SolutionUpdater.Stop();
-            LoginWindow.Window.Dispatcher.Invoke( new Action( () =>
+            LoginWindow.Window.Dispatcher.Invoke(new Action(() =>
                 {
                     Log.CloseWindow();
                     LoginWindow.Window.Close();
-                } ) );
+                }));
             }
 
         #endregion
