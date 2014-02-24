@@ -171,22 +171,22 @@ namespace AramisStarter
         internal void ShowSlowly()
             {
 
-            SplashWindow.logoImage.Opacity = 0;
-            SplashWindow.loadingProgress.Opacity = 0;
-            SplashWindow.progressRect.Opacity = 0;
+            SplashWindow.logoImage.Opacity = 100;
+            SplashWindow.loadingProgress.Opacity = 100;
+            SplashWindow.progressRect.Opacity = 100;
 
             splashWindow.Show();
 
-            DoubleAnimation animation = new DoubleAnimation { To = 1, Duration = TimeSpan.FromMilliseconds( 1800 ) };
-            animation.Completed += new EventHandler( ( senderA, eA ) =>
-            {
-                SplashWindow.logoImage.Opacity = 1.0;
-                SplashWindow.loadingProgress.Opacity = 1.0;
-                SplashWindow.progressRect.Opacity = 1.0;
-                SplashWindow.logoImage.BeginAnimation( OpacityProperty, null );
-            } );
+            //DoubleAnimation animation = new DoubleAnimation { To = 1, Duration = TimeSpan.FromMilliseconds( 1800 ) };
+            //animation.Completed += new EventHandler( ( senderA, eA ) =>
+            //{
+            //    SplashWindow.logoImage.Opacity = 1.0;
+            //    SplashWindow.loadingProgress.Opacity = 1.0;
+            //    SplashWindow.progressRect.Opacity = 1.0;
+            //    SplashWindow.logoImage.BeginAnimation( OpacityProperty, null );
+            //} );
 
-            SplashWindow.logoImage.BeginAnimation( OpacityProperty, animation );
+            //SplashWindow.logoImage.BeginAnimation( OpacityProperty, animation );
             }
 
         internal static void SetNewVersionDownloadingStatus( bool isUpdateDownloadingNow )

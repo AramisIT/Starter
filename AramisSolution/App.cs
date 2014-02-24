@@ -7,10 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Xml.Linq;
 using AramisStarter.FilesDownloading;
 using AramisStarter.Utils;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace AramisStarter
     {
@@ -258,7 +261,7 @@ namespace AramisStarter
                 {
                 InitWithSelectedSolution();
 
-                if (Log.Testing)
+                if (Log.Testing || Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.LeftAlt))
                     {
                     (new Log()).Show();
                     }
