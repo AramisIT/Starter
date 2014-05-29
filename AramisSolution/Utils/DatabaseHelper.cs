@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -68,8 +69,7 @@ namespace AramisStarter.Utils
                     using (SqlCommand cmd = new SqlCommand("Registration", conn))
                         {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        Guid sessionId = System.Guid.NewGuid();
-                        cmd.Parameters.AddWithValue("@SessionId", sessionId);
+                        cmd.Parameters.AddWithValue("@SessionId", Guid.NewGuid());
                         cmd.Parameters.AddWithValue("@Login", userId);
                         cmd.Parameters.AddWithValue("@Password", GetPasswordHash(securePassword));
 
@@ -354,15 +354,7 @@ select 1 ok;
 
         private static string GetDatabaseName()
             {
-            if (TryToOpenConnection(App.SelectedSolution.SqlBaseName + "Update"))
-                {
-                return App.SelectedSolution.SqlBaseName + "Update";
-                }
-            else
-                {
-                return OLD_DATABASE_NAME;
-                }
-
+            return App.SelectedSolution.SqlBaseName + "Update";
             }
 
         private static bool TryToOpenConnection(string databaseName)
@@ -391,5 +383,34 @@ select 1 ok;
             }
 
         private static string updateDatabaseName;
+
+        internal static bool TryToLoginWithTicket(Guid guid, out string userName)
+            {
+            try
+                {
+                using (SqlConnection conn = GetGuestConnection())
+                    {
+                    conn.Open();
+
+                    using (SqlCommand cmd = new SqlCommand("RegistrationWithTicket", conn))
+                        {
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@SessionId", Guid.NewGuid());
+                        cmd.Parameters.AddWithValue("@Ticket", guid);
+
+                        userName = cmd.ExecuteScalar() as string;
+
+                        return !string.IsNullOrEmpty(userName);
+                        }
+                    }
+                }
+            catch (Exception exp)
+                {
+                Trace.WriteLine(exp.Message);
+                }
+
+            userName = string.Empty;
+            return false;
+            }
         }
     }

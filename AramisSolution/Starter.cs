@@ -26,10 +26,8 @@ namespace AramisStarter
 
         private const string USER_KEY_STR = "UserKey";
 
-        private const string UPDATE_MODE_VAR_NAME = "UpdateExit";
-
-        private const string FORSED_UPDATE_VAR_NAME = "ForsedUpdate";
-
+        private const string STARTER_PATH_VAR_NAME = "StarterPath";
+        
         private const string UPDATE_EXISTS_VAR_NAME = "UpdatesExists";
 
         private const string LOADED_STR = "AramisSystemLoaded";
@@ -104,6 +102,8 @@ namespace AramisStarter
 
             solutionDomain.SetData(SERVER_NAME_STR, App.SelectedSolution.SqlServerName);
             solutionDomain.SetData(DATABASE_NAME_STR, App.SelectedSolution.SqlBaseName);
+
+            solutionDomain.SetData(STARTER_PATH_VAR_NAME, SolutionUpdater.STARTER_PATH);
 
             solutionDomain.SetData(USER_ID_STR, LoginWindow.UserName);
             solutionDomain.SetData(USER_KEY_STR, Encryptor.ConvertToByte(LoginWindow.UserPassword));
@@ -189,14 +189,11 @@ namespace AramisStarter
                 } while (!valueSetted);
             }
 
-        private bool ExecuteSolution(out bool exitForUpdate, out bool forsedUpdate)
+        private void ExecuteSolution()
             {
-            exitForUpdate = false;
-            forsedUpdate = false;
-
             if (!RegistrateSolutionExecuting())
                 {
-                return false;
+                return;
                 }
 
             InitSolutionDomain();
@@ -211,7 +208,7 @@ namespace AramisStarter
                 {
                 Log.Append("Executing ThreadAbortException - " + abortExp.Message);
                 App.Stop();
-                return false;
+                return;
                 }
 
             catch (Exception exp)
@@ -231,7 +228,7 @@ namespace AramisStarter
                     {
                     SolutionUpdater.ResetVersion();
                     // tell to updater to updateVersion
-                    return false;
+                    return;
                     }
                 }
 
@@ -240,35 +237,35 @@ namespace AramisStarter
                 Thread.Sleep(WAIT_FOR_THREADS_COMPLATING_INTERVAL_MILLISEC);
                 }
 
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            object exitForUpdateObj = solutionDomain.GetData(UPDATE_MODE_VAR_NAME);
-            object forsedUpdateObj = solutionDomain.GetData(FORSED_UPDATE_VAR_NAME);
+            //GC.WaitForPendingFinalizers();
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
+            //object exitForUpdateObj = solutionDomain.GetData(UPDATE_MODE_VAR_NAME);
+            //object forsedUpdateObj = solutionDomain.GetData(FORSED_UPDATE_VAR_NAME);
 
-            try
-                {
-                Log.Append("before domain unload");
-                AppDomain.Unload(solutionDomain);
-                Log.Append("domain unloaded");
-                }
-            catch
-                {
-                Log.Append("error domain unloaded");
-                return false;
-                }
+            //try
+            //    {
+            //    Log.Append("before domain unload");
+            //    AppDomain.Unload(solutionDomain);
+            //    Log.Append("domain unloaded");
+            //    }
+            //catch
+            //    {
+            //    Log.Append("error domain unloaded");
+            //    return false;
+            //    }
 
-            solutionDomain = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            //solutionDomain = null;
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
 
-            RegistrateSolutionExit();
-            Log.Append("RegistrateSolutionExit() solutionExecuting = " + solutionExecuting.ToString());
+            //RegistrateSolutionExit();
+            //Log.Append("RegistrateSolutionExit() solutionExecuting = " + solutionExecuting.ToString());
 
-            exitForUpdate = (exitForUpdateObj != null) && (exitForUpdateObj is bool) && (bool)exitForUpdateObj;
-            forsedUpdate = (forsedUpdateObj != null) && (forsedUpdateObj is bool) && (bool)forsedUpdateObj;
-            Log.Append("exit ExecuteSolution");
-            return true;
+            //exitForUpdate = (exitForUpdateObj != null) && (exitForUpdateObj is bool) && (bool)exitForUpdateObj;
+            //forsedUpdate = (forsedUpdateObj != null) && (forsedUpdateObj is bool) && (bool)forsedUpdateObj;
+            //Log.Append("exit ExecuteSolution");
+            //return true;
             }
 
         private bool WaitForPermissionToStart()
@@ -296,33 +293,45 @@ namespace AramisStarter
 
         private void SolutionExecutorMethod(object state)
             {
-            bool exit = false;
-
-            do
+            while (!(SolutionUpdater.ReadyToRun && LoginWindow.Authorized))
                 {
-                if (SolutionUpdater.ReadyToRun && LoginWindow.Authorized)
-                    {
-                    if (!WaitForPermissionToStart())
-                        {
-                        return;
-                        }
-
-                    bool exitForUpdate, forsedUpdate;
-                    exit = !ExecuteSolution(out exitForUpdate, out forsedUpdate) || !exitForUpdate;
-
-                    if (exitForUpdate)
-                        {
-                        SolutionUpdater.MakeToUpdate(forsedUpdate);
-                        }
-                    }
-                else
-                    {
-                    Thread.Sleep(WAIT_FOR_RUN_INTERVAL_MILLISEC);
-                    }
+                Thread.Sleep(WAIT_FOR_RUN_INTERVAL_MILLISEC);
                 }
-            while (!exit);
 
+            if (!WaitForPermissionToStart())
+                {
+                return;
+                }
+
+            ExecuteSolution();
             App.Stop();
+
+            //bool exit = false;
+            //do
+            //    {
+            //    if (SolutionUpdater.ReadyToRun && LoginWindow.Authorized)
+            //        {
+            //        if (!WaitForPermissionToStart())
+            //            {
+            //            return;
+            //            }
+
+            //        bool exitForUpdate, forsedUpdate;
+            //        exit = !ExecuteSolution(out exitForUpdate, out forsedUpdate) || !exitForUpdate;
+
+            //        if (exitForUpdate)
+            //            {
+            //            SolutionUpdater.MakeToUpdate(forsedUpdate);
+            //            }
+            //        }
+            //    else
+            //        {
+            //        Thread.Sleep(WAIT_FOR_RUN_INTERVAL_MILLISEC);
+            //        }
+            //    }
+            //while (!exit);
+
+            //App.Stop();
             }
 
         #endregion

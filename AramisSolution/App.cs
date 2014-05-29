@@ -160,6 +160,8 @@ namespace AramisStarter
 
         #region public
 
+        internal static StartParameters StartParameters { get; set; }
+
         /// <summary>
         /// Загружаемое решение
         /// </summary>
@@ -187,8 +189,17 @@ namespace AramisStarter
         [STAThread()]
         static void Main(string[] args)
             {
+            //MessageBox.Show(args.FirstOrDefault());
+
             string STARTER_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Aramis .NET\Starter";
             string solutionPath = STARTER_PATH + @"\Solutions.xml";
+
+            App.StartParameters = new StartParameters(args.FirstOrDefault());
+            if (App.StartParameters.TerminatingProcessId > 0)
+                {
+                ProcessHelper.TerminateOldProcess(App.StartParameters.TerminatingProcessId);
+                if (App.StartParameters.ExecuteType == ExecuteTypes.Terminate) return;
+                }
 
             App app = new App(solutionPath);
             app.Start(args);
@@ -196,12 +207,11 @@ namespace AramisStarter
 
         private void Start(string[] args)
             {
-
             if (ProcessHelper.GetOtherSameProcessesList(true).Count > 0)
                 {
                 if (MessageBox.Show("Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены", "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes)
                     {
-                    ProcessHelper.GetOtherSameProcessesList(true).ForEach(process => process.Kill());
+                    ProcessHelper.GetOtherSameProcessesList(true).ForEach(process => process.SafetyKill());
                     }
                 else
                     {
@@ -250,7 +260,20 @@ namespace AramisStarter
                 {
                 SelectedSolution = solutions[0];
                 }
-            else
+            else if (App.StartParameters.ExecuteType == ExecuteTypes.Restart)
+                {
+                foreach (var solution in solutions)
+                    {
+                    if (solution.SqlBaseName.Equals(App.StartParameters.DatabaseName, StringComparison.OrdinalIgnoreCase)
+                        && solution.SqlServerName.Equals(App.StartParameters.ServerName, StringComparison.OrdinalIgnoreCase))
+                        {
+                        SelectedSolution = solution;
+                        break;
+                        }
+                    }
+                }
+
+            if (SelectedSolution == null)
                 {
                 SolutionSelectingWindow seleectingWindow = new SolutionSelectingWindow(solutions);
                 seleectingWindow.ShowDialog();

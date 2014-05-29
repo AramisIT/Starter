@@ -70,6 +70,7 @@
     <Compile Include="StarterForms\Log.xaml.cs">
       <DependentUpon>Log.xaml</DependentUpon>
     </Compile>
+    <Compile Include="StartParameters.cs" />
     <Compile Include="Utils\Authorization.cs" />
     <Compile Include="Utils\Encryptor.cs" />
     <Compile Include="Utils\HashGenerator.cs" />

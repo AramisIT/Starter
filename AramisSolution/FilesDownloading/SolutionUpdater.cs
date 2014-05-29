@@ -107,19 +107,19 @@ namespace AramisStarter.FilesDownloading
 
         private bool UpdateFiles()
             {
-            Log.Append("UpdateFiles() - enter");
+            //Log.Append("UpdateFiles() - enter");
 
             if (Starter.SolutionExecuting)
                 {
-                Log.Append("if ( Starter.SolutionExecuting ) return false;");
+                //Log.Append("if ( Starter.SolutionExecuting ) return false;");
                 return false;
                 }
 
             List<Process> anotherProcesses = GetAnotherProcesses();
-            Log.Append("anotherProcesses = GetAnotherProcesses();");
+            //Log.Append("anotherProcesses = GetAnotherProcesses();");
             if (anotherProcesses.Count > 0)
                 {
-                Log.Append("anotherProcesses.Count > 0");
+                //Log.Append("anotherProcesses.Count > 0");
                 if (waitForOtherProcessesComplated && !MaxTimeForSolutionExitExeeded())
                     {
                     Log.Append("waitForOtherProcessesComplated && !MaxTimeForSolutionExitExeeded()");
@@ -128,19 +128,19 @@ namespace AramisStarter.FilesDownloading
 
                 anotherProcesses.ForEach(anotherProcess =>
                     {
-                        anotherProcess.Kill();
+                        anotherProcess.SafetyKill();
                     });
                 }
 
-            Log.Append("before bool downloadedFilesUsed = UseDownloadedFiles();");
+            //Log.Append("before bool downloadedFilesUsed = UseDownloadedFiles();");
             bool downloadedFilesUsed = UseDownloadedFiles();
 
-            if (!readyToRun)
-                {
-                Log.Append("UpdateFiles() - exit; downloadedFilesUsed = " + downloadedFilesUsed.ToString());
-                }
+            //if (!readyToRun)
+            //    {
+            //    Log.Append("UpdateFiles() - exit; downloadedFilesUsed = " + downloadedFilesUsed.ToString());
+            //    }
 
-            Log.Append("UpdateFiles() exit downloadedFilesUsed = " + downloadedFilesUsed.ToString());
+            //Log.Append("UpdateFiles() exit downloadedFilesUsed = " + downloadedFilesUsed.ToString());
             return downloadedFilesUsed;
             }
 
