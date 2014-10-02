@@ -194,7 +194,15 @@ namespace AramisStarter
             string STARTER_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Aramis .NET\Starter";
             string solutionPath = STARTER_PATH + @"\Solutions.xml";
 
-            App.StartParameters = new StartParameters(args.FirstOrDefault());
+            var firstParameter = args.FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(firstParameter))
+                {
+                App.RunDefaultCredential = firstParameter.EndsWith("RunDefaultCredential",
+                    StringComparison.OrdinalIgnoreCase);
+                }
+
+            App.StartParameters = new StartParameters(firstParameter);
             if (App.StartParameters.TerminatingProcessId > 0)
                 {
                 ProcessHelper.TerminateOldProcess(App.StartParameters.TerminatingProcessId);
@@ -316,6 +324,6 @@ namespace AramisStarter
 
         #endregion
 
-
+        public static bool RunDefaultCredential { get; set; }
         }
     }

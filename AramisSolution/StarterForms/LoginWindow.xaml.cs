@@ -55,6 +55,11 @@ namespace AramisStarter
                 }
             FillNames();
             SelectLastLogin();
+            if (App.RunDefaultCredential && passwordBox.Password.Length > 0
+                && !Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
+                {
+                TryToLogin();
+                }
             }
 
         private void UseAlternativeStyle()
