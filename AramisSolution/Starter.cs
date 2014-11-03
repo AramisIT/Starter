@@ -20,6 +20,8 @@ namespace AramisStarter
 
         private const string SERVER_NAME_STR = "ServerName";
 
+        private const string VERSION_NUMBER = "SolutionVersionNumber";
+
         private const string DATABASE_NAME_STR = "DatabaseName";
 
         private const string USER_ID_STR = "User";
@@ -27,7 +29,7 @@ namespace AramisStarter
         private const string USER_KEY_STR = "UserKey";
 
         private const string STARTER_PATH_VAR_NAME = "StarterPath";
-        
+
         private const string UPDATE_EXISTS_VAR_NAME = "UpdatesExists";
 
         private const string LOADED_STR = "AramisSystemLoaded";
@@ -101,6 +103,7 @@ namespace AramisStarter
             solutionDomain.SetData(LOADED_STR, false);
 
             solutionDomain.SetData(SERVER_NAME_STR, App.SelectedSolution.SqlServerName);
+            solutionDomain.SetData(VERSION_NUMBER, SolutionUpdater.ReadUpdateNumber());
             solutionDomain.SetData(DATABASE_NAME_STR, App.SelectedSolution.SqlBaseName);
 
             solutionDomain.SetData(STARTER_PATH_VAR_NAME, SolutionUpdater.STARTER_PATH);

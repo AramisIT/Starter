@@ -873,10 +873,11 @@ namespace AramisStarter.FilesDownloading
             return updateTemporaryFolderPath + fileGuidStr;
             }
 
-        private static void ReadUpdateNumber()
+        public static int ReadUpdateNumber()
             {
             object updateNumberObj = registryKey.GetValue(UPDATE_NUMBER);
             currentVersion = updateNumberObj == null ? 0 : Convert.ToInt32(updateNumberObj.ToString());
+            return currentVersion;
             }
 
         private void StartUpdater()
