@@ -217,7 +217,8 @@ namespace AramisStarter
             {
             if (ProcessHelper.GetOtherSameProcessesList(true).Count > 0)
                 {
-                if (MessageBox.Show("Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены", "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes)
+                if (MessageBox.Show(string.Format("Для продолжения запуска требуется закрыть другие запущенные копии системы.\r\n\r\nНажмите Да и система продолжит запуск\r\n\r\nНажмите Нет для отмены{0}",
+                    App.StartParameters.TerminatingProcessId > 0 ? "\r\nПроцесс: " + App.StartParameters.TerminatingProcessId.ToString() : ""), "Aramis system", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes)
                     {
                     ProcessHelper.GetOtherSameProcessesList(true).ForEach(process => process.SafetyKill());
                     }
@@ -292,10 +293,10 @@ namespace AramisStarter
                 {
                 InitWithSelectedSolution();
 
-                if (Log.Testing || Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.LeftAlt))
-                    {
-                    (new Log()).Show();
-                    }
+                //if (Log.Testing || Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.LeftAlt))
+                //    {
+                //    (new Log()).Show();
+                //    }
 
                 Run(mainWindow);
                 }
