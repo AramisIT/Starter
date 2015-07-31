@@ -485,7 +485,7 @@ namespace AramisStarter.FilesDownloading
                                 DownloadFileInfo fileInfo = filesToDownLoad[fileId];
                                 string temporaryFilePath = GetTemporaryFilePath(fileId);
 
-                                if (SaveTemporaryFile(temporaryFilePath, fileInfo.FileSize, dataReader))
+                                if (saveTemporaryFile(temporaryFilePath, fileInfo.FileSize, dataReader))
                                     {
                                     filesToDownLoad.Remove(fileId);
                                     totalDownloadedBytes += fileInfo.FileSize;
@@ -558,7 +558,7 @@ namespace AramisStarter.FilesDownloading
         /// <param name="fileSize">File size</param>
         /// <param name="dataReader">Созданный риадер с параметром CommandBehavior.SequentialAccess</param>
         /// <returns></returns>
-        private static bool SaveTemporaryFile(string filePath, long fileSize, SqlDataReader dataReader)
+        private static bool saveTemporaryFile(string filePath, long fileSize, SqlDataReader dataReader)
             {
             FileStream file;
             byte[] readBuffer = new byte[BUFFER_SIZE];
@@ -930,7 +930,7 @@ namespace AramisStarter.FilesDownloading
                             #endregion
 
                             long fileSize = Convert.ToInt64(dataReader["fileSize"]);
-                            bool updateSaved = SaveTemporaryFile(UPDATE_STARTER_PATH, fileSize, dataReader);
+                            bool updateSaved = saveTemporaryFile(UPDATE_STARTER_PATH, fileSize, dataReader);
 
                             SyncHelper.ExitMutex(starterRuningMutex);
 

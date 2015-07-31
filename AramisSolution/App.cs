@@ -212,7 +212,10 @@ namespace AramisStarter
             App app = new App(solutionPath);
             app.Start(args);
             }
-
+        /// <summary>
+        /// to debug set as run parameter: "7028;4dee93e9-f991-47f8-9493-931aa945897a;AramisPlatform;localhost"
+        /// </summary>
+        /// <param name="args"></param>
         private void Start(string[] args)
             {
             if (ProcessHelper.GetOtherSameProcessesList(true).Count > 0)
