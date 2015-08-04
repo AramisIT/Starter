@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisSolution", "AramisSol
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AramisPreStart", "AramisPreStart\AramisPreStart.csproj", "{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSolutionUpdater", "WebSolutionUpdater\WebSolutionUpdater.csproj", "{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,16 @@ Global
 		{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F2DADE8D-5CF3-4934-81B0-C23AC65592A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DD6BF791-85F9-46AC-84DB-BF5529DF65FB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
