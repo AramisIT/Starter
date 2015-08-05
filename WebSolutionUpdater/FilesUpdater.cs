@@ -80,15 +80,19 @@ namespace WebSolutionUpdater
 
             try
                 {
-                File.Move(sourceFileName, destinationFileName);
+                if (fileInfo.IsDesktop)
+                    {
+                    File.Copy(sourceFileName, destinationFileName);
+                    }
+                else
+                    {
+                    File.Move(sourceFileName, destinationFileName);
+                    }
                 }
             catch (Exception exp)
                 {
                 return false;
                 }
-
-            File.SetCreationTime(destinationFileName, fileInfo.ModifiedTime);
-            File.SetLastWriteTime(destinationFileName, fileInfo.ModifiedTime);
 
             return true;
             }

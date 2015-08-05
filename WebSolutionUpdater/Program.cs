@@ -23,6 +23,8 @@ namespace WebSolutionUpdater
                 || string.IsNullOrEmpty(updateTempFolder)
                 || string.IsNullOrEmpty(checkUrl)) return;
 
+            Thread.Sleep(1000); // allow to the web app to send last reply 
+
             var result = new FilesUpdater(publishDirectory, updateTempFolder, checkUrl).PerformUpdate();
             Console.WriteLine();
 

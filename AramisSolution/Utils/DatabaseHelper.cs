@@ -350,8 +350,6 @@ select 1 ok;
                 }
             }
 
-        private const string OLD_DATABASE_NAME = "AramisUpdate";
-
         private static string GetDatabaseName()
             {
             return App.SelectedSolution.SqlBaseName + "Update";
