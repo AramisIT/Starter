@@ -38,40 +38,76 @@ namespace WebSolutionUpdater
                 };
             }
 
-        public bool PerformUpdate()
+        public bool PerformUpdate(out string errorDescription)
             {
-            if (string.IsNullOrEmpty(publishDirectory) || string.IsNullOrEmpty(updateTempFolder)
-                || !fillUpdateTask()) return false;
+            errorDescription = string.Empty;
+
+            if (string.IsNullOrEmpty(publishDirectory) || string.IsNullOrEmpty(updateTempFolder))
+                {
+                errorDescription = "publishDirectory or updateTempFolder were not defined!";
+                return false;
+                }
+
+            if (!fillUpdateTask())
+                {
+                errorDescription = "Can't fill update task!";
+                return false;
+                }
 
             foreach (var file in task.FilesToRemove)
                 {
-                if (!IOHelper.TryRemoveFile(file)) return false;
+                if (!IOHelper.TryRemoveFile(file))
+                    {
+                    errorDescription = string.Format("Can't remove file: {0}", file);
+                    return false;
+                    }
                 }
 
             foreach (var directory in task.DirectoriesToEmpty)
                 {
-                if (!IOHelper.TryEmptyDirectory(directory)) return false;
+                if (!IOHelper.TryEmptyDirectory(directory))
+                    {
+                    errorDescription = string.Format("Can't empty the directory: {0}", directory);
+                    return false;
+                    }
                 }
 
             foreach (var directory in task.DirectoriesToCreate)
                 {
-                if (!IOHelper.TryCreateDirectory(directory)) return false;
+                if (!IOHelper.TryCreateDirectory(directory))
+                    {
+                    errorDescription = string.Format("Can't create the directory: {0}", directory);
+                    return false;
+                    }
                 }
 
             foreach (var kvp in task.FilesToMove)
                 {
                 var fileName = kvp.Key;
                 var fileInfo = kvp.Value;
-                if (!moveFile(fileInfo, fileName)) return false;
+                if (!moveFile(fileInfo, fileName))
+                    {
+                    errorDescription = string.Format("Can't move (or copy) file: {0}", fileName);
+                    return false;
+                    }
                 }
 
-            return checkWebApplication();
+            return checkWebApplication(out errorDescription);
             }
 
-        private bool checkWebApplication()
+        private bool checkWebApplication(out string errorDescription)
             {
+            errorDescription = string.Empty;
+
             var reply = new WebClientHelper(checkUrl).PerformPostRequest();
-            return reply.StartsWith("OK", StringComparison.InvariantCultureIgnoreCase);
+            bool isValid = reply.StartsWith("OK", StringComparison.InvariantCultureIgnoreCase);
+
+            if (!isValid)
+                {
+                errorDescription = string.Format("Web app wasn't loaded: {0}", reply);
+                }
+
+            return isValid;
             }
 
         private bool moveFile(UploadingFile fileInfo, string destinationFileName)

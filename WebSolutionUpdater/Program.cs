@@ -23,21 +23,27 @@ namespace WebSolutionUpdater
                 || string.IsNullOrEmpty(updateTempFolder)
                 || string.IsNullOrEmpty(checkUrl)) return;
 
-            Thread.Sleep(1000); // allow to the web app to send last reply 
+            Thread.Sleep(3000); // allow to the web app to send last reply 
 
-            var result = new FilesUpdater(publishDirectory, updateTempFolder, checkUrl).PerformUpdate();
+            string errorDescription;
+            var result = new FilesUpdater(publishDirectory, updateTempFolder, checkUrl).PerformUpdate(out errorDescription);
             Console.WriteLine();
 
+            var timeout = 4000;
             if (result)
                 {
                 Console.WriteLine("Application has been succsessfully updated!".ToUpper());
                 }
             else
                 {
-                Console.WriteLine("An error occured while application were updating!");
+                Console.WriteLine(string.Format(@"An error occured while application were updating:
+
+{0}", errorDescription));
+
+                timeout = 15000;
                 }
 
-            Thread.Sleep(4000);
+            Thread.Sleep(timeout);
             }
 
         private static bool checkThisProcessIsSingle()
