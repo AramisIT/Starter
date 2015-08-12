@@ -92,7 +92,9 @@ namespace WebSolutionUpdater
                     }
                 }
 
-            return checkWebApplication(out errorDescription);
+            checkWebApplication(out errorDescription);
+
+            return true;
             }
 
         private bool checkWebApplication(out string errorDescription)

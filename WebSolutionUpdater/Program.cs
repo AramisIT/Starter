@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -11,6 +12,9 @@ namespace WebSolutionUpdater
     {
     class Program
         {
+        private static readonly string PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private static readonly string ERROR_FILE_NAME = string.Format(@"{0}\error.txt", PATH);
+
         static void Main(string[] args)
             {
             if (args.Length > 0)
@@ -45,10 +49,34 @@ namespace WebSolutionUpdater
 
 {0}", errorDescription));
 
+                logError(errorDescription);
+
                 timeout = 15000;
                 }
 
             Thread.Sleep(timeout);
+            }
+
+        private static bool logError(string message)
+            {
+            message = string.Format("{0}\t{1}", DateTime.Now.ToString("MM-dd HH:mm:ss"), message);
+
+            try
+                {
+                if (File.Exists(ERROR_FILE_NAME))
+                    {
+                    File.AppendAllLines(ERROR_FILE_NAME, new List<string>() { message });
+                    }
+                else
+                    {
+                    File.WriteAllText(ERROR_FILE_NAME, message);
+                    }
+                }
+            catch
+                {
+                return false;
+                }
+            return true;
             }
 
         private static bool tryExit(string parameter)
