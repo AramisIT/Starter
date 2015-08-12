@@ -13,6 +13,11 @@ namespace WebSolutionUpdater
         {
         static void Main(string[] args)
             {
+            if (args.Length > 0)
+                {
+                if (tryExit(args[0])) return;
+                }
+
             if (!checkThisProcessIsSingle()) return;
 
             var publishDirectory = ConfigurationManager.AppSettings["PublishDirectory"];
@@ -44,6 +49,20 @@ namespace WebSolutionUpdater
                 }
 
             Thread.Sleep(timeout);
+            }
+
+        private static bool tryExit(string parameter)
+            {
+            int parameterInt;
+            if (!Int32.TryParse(parameter, out parameterInt)) return false;
+
+            if (parameterInt > 0)
+                {
+                parameterInt = Math.Min(parameterInt, 200);
+                Thread.Sleep(parameterInt * 1000);
+                }
+
+            return true;
             }
 
         private static bool checkThisProcessIsSingle()
