@@ -43,7 +43,9 @@ namespace WebSolutionUpdater.Helpers
                 {
                 if (!removeContent(dir)) return false;
 
-                if (!removeEmptyDirectory(dir.FullName)) return false;
+                // if (!
+                removeEmptyDirectory(dir.FullName);
+                //) return false;
                 }
 
             return true;
@@ -65,13 +67,16 @@ namespace WebSolutionUpdater.Helpers
 
         public static bool TryCreateDirectory(string directoryPath)
             {
-            try
+            if (!Directory.Exists(directoryPath))
                 {
-                Directory.CreateDirectory(directoryPath);
-                }
-            catch (Exception exp)
-                {
-                return false;
+                try
+                    {
+                    Directory.CreateDirectory(directoryPath);
+                    }
+                catch (Exception exp)
+                    {
+                    return false;
+                    }
                 }
 
             return true;

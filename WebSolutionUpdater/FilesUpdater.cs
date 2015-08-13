@@ -124,7 +124,14 @@ namespace WebSolutionUpdater
                     }
                 else
                     {
-                    File.Move(sourceFileName, destinationFileName);
+                    try
+                        {
+                        File.Move(sourceFileName, destinationFileName);
+                        }
+                    catch
+                        {
+                        File.Copy(sourceFileName, destinationFileName);
+                        }
                     }
                 }
             catch (Exception exp)
