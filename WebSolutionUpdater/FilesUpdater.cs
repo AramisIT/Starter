@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using AramisIDE.SolutionUpdating;
 using AramisIDE.Utils;
 using Microsoft.SqlServer.Server;
@@ -76,8 +77,13 @@ namespace WebSolutionUpdater
                 {
                 if (!IOHelper.TryCreateDirectory(directory))
                     {
-                    errorDescription = string.Format("Can't create the directory: {0}", directory);
-                    return false;
+                    Thread.Sleep(700);
+
+                    if (!Directory.Exists(directory))
+                        {
+                        errorDescription = string.Format("Can't create the directory: {0}", directory);
+                        return false;
+                        }
                     }
                 }
 
