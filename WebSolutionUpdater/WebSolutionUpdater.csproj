@@ -45,7 +45,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DetailedUpdateTask.cs" />
     <Compile Include="FilesUpdater.cs" />
     <Compile Include="Helpers\IgnoreCaseStringEqualityComparer.cs" />
     <Compile Include="Helpers\IOHelper.cs" />

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using WebSolutionUpdater.Helpers;
 
 namespace WebSolutionUpdater
     {
@@ -23,6 +24,8 @@ namespace WebSolutionUpdater
                 }
 
             if (!checkThisProcessIsSingle()) return;
+
+            waitInCaseOfTesting(ConfigurationManager.AppSettings["TestMutexFilePath"]);
 
             var publishDirectory = ConfigurationManager.AppSettings["PublishDirectory"];
             var updateTempFolder = ConfigurationManager.AppSettings["UpdateTempFolder"];
@@ -55,6 +58,28 @@ namespace WebSolutionUpdater
                 }
 
             Thread.Sleep(timeout);
+            }
+
+        private static void waitInCaseOfTesting(string testMutexFilePath)
+            {
+            if (string.IsNullOrEmpty(testMutexFilePath)) return;
+
+            while (true)
+                {
+                try
+                    {
+                    if (!File.Exists(testMutexFilePath)) return;
+
+                    var fileInfo = new FileInfo(testMutexFilePath);
+                    if (fileInfo.Length == 0) return;
+
+                    Thread.Sleep(500);
+                    }
+                catch
+                    {
+                    return;
+                    }
+                }
             }
 
         private static bool logError(string message)

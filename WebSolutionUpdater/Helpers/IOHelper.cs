@@ -4,13 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace WebSolutionUpdater.Helpers
     {
     public class IOHelper
         {
-        public static bool TryRemoveFile(string fileName)
+        public static bool TryRemoveFile(string fileName, out string errorDescription)
             {
+            errorDescription = "";
             if (!File.Exists(fileName)) return true;
 
             try
@@ -19,9 +21,25 @@ namespace WebSolutionUpdater.Helpers
                 }
             catch
                 {
-
+                Thread.Sleep(300);
+                try
+                    {
+                    File.Delete(fileName);
+                    }
+                catch (Exception exp)
+                    {
+                    errorDescription = string.Format(@"Can't remove file ""{0}"": {1}", fileName, exp.Message);
+                    return false;
+                    }
                 }
+
             return !File.Exists(fileName);
+            }
+
+        public static bool TryRemoveFile(string fileName)
+            {
+            string errorDescription;
+            return TryRemoveFile(fileName, out errorDescription);
             }
 
         public static bool TryEmptyDirectory(string directoryPath)
@@ -44,14 +62,14 @@ namespace WebSolutionUpdater.Helpers
                 if (!removeContent(dir)) return false;
 
                 // if (!
-                removeEmptyDirectory(dir.FullName);
+                RemoveEmptyDirectory(dir.FullName);
                 //) return false;
                 }
 
             return true;
             }
 
-        private static bool removeEmptyDirectory(string directoryPath)
+        public static bool RemoveEmptyDirectory(string directoryPath)
             {
             try
                 {
@@ -65,7 +83,7 @@ namespace WebSolutionUpdater.Helpers
             return true;
             }
 
-        public static bool TryCreateDirectory(string directoryPath)
+        public static bool TryCreateDirectory(string directoryPath, out string error)
             {
             if (!Directory.Exists(directoryPath))
                 {
@@ -75,10 +93,12 @@ namespace WebSolutionUpdater.Helpers
                     }
                 catch (Exception exp)
                     {
+                    error = exp.Message;
                     return false;
                     }
                 }
 
+            error = null;
             return true;
             }
         }

@@ -15,47 +15,107 @@ namespace WebSolutionUpdater
     class FilesUpdater
         {
         private string publishDirectory;
+
         private string updateTempFolder;
-        private DetailedUpdateTask task;
+
         private string checkUrl;
 
-        public FilesUpdater(string publishDirectory, string updateTempFolder, string checkUrl)
-            {
-            this.publishDirectory = publishDirectory;
-            this.updateTempFolder = updateTempFolder;
-            this.checkUrl = checkUrl;
-            task = new DetailedUpdateTask();
-            }
+        private WebAppUpdaterTasks webAppUpdaterTasks;
 
-        private Dictionary<FilesGroupTypes, string> getMainDirectoriesNames()
+        private string errorDescription;
+
+        private bool updateWebApplication(out string _errorDescription)
             {
-            return new Dictionary<FilesGroupTypes, string>()
+            if (!createDirectories())
                 {
-                {FilesGroupTypes.WebContent,string.Format(@"{0}\Content", publishDirectory)},
-                {FilesGroupTypes.WebScripts,string.Format(@"{0}\Scripts", publishDirectory)},
-                {FilesGroupTypes.WebViews,string.Format(@"{0}\Views", publishDirectory)},
-                {FilesGroupTypes.WebRoot, publishDirectory},
-                {FilesGroupTypes.WebBin, string.Format(@"{0}\bin", publishDirectory)}
-                };
-            }
-
-        public bool PerformUpdate(out string errorDescription)
-            {
-            errorDescription = string.Empty;
-
-            if (string.IsNullOrEmpty(publishDirectory) || string.IsNullOrEmpty(updateTempFolder))
-                {
-                errorDescription = "publishDirectory or updateTempFolder were not defined!";
+                _errorDescription = errorDescription;
                 return false;
                 }
 
-            if (!fillUpdateTask())
+            if (!createFiles())
                 {
-                errorDescription = "Can't fill update task!";
+                _errorDescription = errorDescription;
                 return false;
                 }
 
-            foreach (var file in task.FilesToRemove)
+            if (!updateFiles())
+                {
+                _errorDescription = errorDescription;
+                return false;
+                }
+
+            if (!removeFiles())
+                {
+                _errorDescription = errorDescription;
+                return false;
+                }
+
+            if (!removeDirectories())
+                {
+                _errorDescription = errorDescription;
+                return false;
+                }
+
+            _errorDescription = string.Empty;
+            return true;
+            }
+
+        private bool createDirectories()
+            {
+            foreach (var directory in webAppUpdaterTasks.DirectoriesToAdd)
+                {
+                string error;
+                if (!IOHelper.TryCreateDirectory(directory, out error))
+                    {
+                    Thread.Sleep(700);
+
+                    if (!Directory.Exists(directory))
+                        {
+                        errorDescription = string.Format("Can't create the directory: {0}. {1}", directory, error);
+                        return false;
+                        }
+                    }
+                }
+
+            return true;
+            }
+
+        private bool createFiles()
+            {
+            foreach (var fileInfo in webAppUpdaterTasks.FilesToAdd)
+                {
+                if (!moveFile(fileInfo))
+                    {
+                    errorDescription = string.Format("Can't move (or copy) file: {0}", fileInfo.FullPath);
+                    return false;
+                    }
+                }
+
+            return true;
+            }
+
+        private bool updateFiles()
+            {
+            var success = true;
+            string _errorDescription;
+            foreach (var fileTaskDetails in webAppUpdaterTasks.FilesToRewrite)
+                {
+                success = IOHelper.TryRemoveFile(fileTaskDetails.FullPath, out _errorDescription)
+                          && moveFile(fileTaskDetails);
+
+                if (!success && string.IsNullOrEmpty(errorDescription)
+                    && !string.IsNullOrEmpty(_errorDescription))
+                    {
+                    this.errorDescription = _errorDescription;
+                    }
+                }
+
+            return success;
+            }
+
+        private bool removeFiles()
+            {
+            foreach (var file in webAppUpdaterTasks.FilesToRemove)
                 {
                 if (!IOHelper.TryRemoveFile(file))
                     {
@@ -64,43 +124,20 @@ namespace WebSolutionUpdater
                     }
                 }
 
-            foreach (var directory in task.DirectoriesToEmpty)
-                {
-                if (!IOHelper.TryEmptyDirectory(directory))
-                    {
-                    errorDescription = string.Format("Can't empty the directory: {0}", directory);
-                    return false;
-                    }
-                }
-
-            foreach (var directory in task.DirectoriesToCreate)
-                {
-                if (!IOHelper.TryCreateDirectory(directory))
-                    {
-                    Thread.Sleep(700);
-
-                    if (!Directory.Exists(directory))
-                        {
-                        errorDescription = string.Format("Can't create the directory: {0}", directory);
-                        return false;
-                        }
-                    }
-                }
-
-            foreach (var kvp in task.FilesToMove)
-                {
-                var fileName = kvp.Key;
-                var fileInfo = kvp.Value;
-                if (!moveFile(fileInfo, fileName))
-                    {
-                    errorDescription = string.Format("Can't move (or copy) file: {0}", fileName);
-                    return false;
-                    }
-                }
-
-            checkWebApplication(out errorDescription);
-
             return true;
+            }
+
+        private bool removeDirectories()
+            {
+            var success = true;
+            foreach (var directoryPath in webAppUpdaterTasks.DirectoriesToRemove)
+                {
+                success = IOHelper.TryEmptyDirectory(directoryPath)
+                    && IOHelper.RemoveEmptyDirectory(directoryPath)
+                    && success;
+                }
+
+            return success;
             }
 
         private bool checkWebApplication(out string errorDescription)
@@ -118,30 +155,24 @@ namespace WebSolutionUpdater
             return isValid;
             }
 
-        private bool moveFile(UploadingFile fileInfo, string destinationFileName)
+        private bool moveFile(UpdateFileTaskDetails updateFileTaskDetails)
             {
-            var sourceFileName = string.Format(@"{0}\{1}", updateTempFolder, fileInfo.Id);
-
+            var sourceFileName = string.Format(@"{0}\{1}", updateTempFolder, updateFileTaskDetails.Id);
+            var destinationFileName = updateFileTaskDetails.FullPath;
             try
                 {
-                if (fileInfo.IsDesktop)
+                try
+                    {
+                    File.Move(sourceFileName, destinationFileName);
+                    }
+                catch
                     {
                     File.Copy(sourceFileName, destinationFileName);
-                    }
-                else
-                    {
-                    try
-                        {
-                        File.Move(sourceFileName, destinationFileName);
-                        }
-                    catch
-                        {
-                        File.Copy(sourceFileName, destinationFileName);
-                        }
                     }
                 }
             catch (Exception exp)
                 {
+                errorDescription = string.Format(@"Can't copy file ""{0}"": {1}", sourceFileName, exp.Message);
                 return false;
                 }
 
@@ -150,51 +181,56 @@ namespace WebSolutionUpdater
 
         private bool fillUpdateTask()
             {
-            UpdatingFilesList filesList = readFilesList();
-            if (filesList == null || filesList.Files.Count == 0) return false;
-
-            var mainDirectories = getMainDirectoriesNames();
-
-            task.DirectoriesToEmpty.AddAnyway(mainDirectories[FilesGroupTypes.WebScripts]);
-            task.DirectoriesToEmpty.AddAnyway(mainDirectories[FilesGroupTypes.WebContent]);
-            task.DirectoriesToEmpty.AddAnyway(mainDirectories[FilesGroupTypes.WebViews]);
-
-            foreach (var fileInfo in filesList.Files)
-                {
-                if (!fileInfo.IsWebSystem) continue;
-
-                var fullPathToNewFile = mainDirectories[fileInfo.Group] + "\\" + fileInfo.FilePath;
-                task.FilesToMove.AddAnyway(fullPathToNewFile, fileInfo);
-
-                var fileDirectory = Path.GetDirectoryName(fullPathToNewFile);
-                task.DirectoriesToCreate.AddAnyway(fileDirectory);
-
-                if (fileInfo.Group == FilesGroupTypes.WebBin || fileInfo.Group == FilesGroupTypes.WebRoot)
-                    {
-                    task.FilesToRemove.AddAnyway(fullPathToNewFile);
-                    }
-                }
-
-            return true;
+            webAppUpdaterTasks = readFilesList();
+            return webAppUpdaterTasks != null;
             }
 
-        private UpdatingFilesList readFilesList()
+        private WebAppUpdaterTasks readFilesList()
             {
             var taskFilePath = string.Format(@"{0}\tasks.xml", updateTempFolder);
             if (!File.Exists(taskFilePath)) return null;
 
-            var taskXml = string.Empty;
-
             try
                 {
-                taskXml = File.ReadAllText(taskFilePath);
+                var taskXml = File.ReadAllText(taskFilePath);
+                return XmlConvertor.ToObjectFromXmlString<WebAppUpdaterTasks>(taskXml);
                 }
             catch
                 {
                 return null;
                 }
+            }
 
-            return XmlConvertor.ToListFromXmlString(taskXml);
+        public FilesUpdater(string publishDirectory, string updateTempFolder, string checkUrl)
+            {
+            this.publishDirectory = publishDirectory;
+            this.updateTempFolder = updateTempFolder;
+            this.checkUrl = checkUrl;
+            }
+
+        public bool PerformUpdate(out string _errorDescription)
+            {
+            if (string.IsNullOrEmpty(publishDirectory) || string.IsNullOrEmpty(updateTempFolder))
+                {
+                _errorDescription = "publishDirectory or updateTempFolder were not defined!";
+                return false;
+                }
+
+            if (!fillUpdateTask())
+                {
+                _errorDescription = "Can't fill update task!";
+                return false;
+                }
+
+            if (!updateWebApplication(out _errorDescription)) return false;
+
+            var webApplicationIsLoaded = checkWebApplication(out _errorDescription);
+            if (!webApplicationIsLoaded)
+                {
+                _errorDescription = "Web application isn't loaded!";
+                }
+
+            return true;
             }
         }
     }
