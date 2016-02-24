@@ -25,6 +25,8 @@ namespace WebSolutionUpdater
 
             if (!checkThisProcessIsSingle()) return;
 
+            Thread.Sleep(1500);
+
             waitInCaseOfTesting(ConfigurationManager.AppSettings["TestMutexFilePath"]);
 
             var publishDirectory = ConfigurationManager.AppSettings["PublishDirectory"];
@@ -35,13 +37,11 @@ namespace WebSolutionUpdater
                 || string.IsNullOrEmpty(updateTempFolder)
                 || string.IsNullOrEmpty(checkUrl)) return;
 
-            Thread.Sleep(3000); // allow to the web app to send last reply 
-
             string errorDescription;
             var result = new FilesUpdater(publishDirectory, updateTempFolder, checkUrl).PerformUpdate(out errorDescription);
             Console.WriteLine();
 
-            var timeout = 4000;
+            var timeout = 0;
             if (result)
                 {
                 Console.WriteLine("Application has been succsessfully updated!".ToUpper());
@@ -55,9 +55,8 @@ namespace WebSolutionUpdater
                 logError(errorDescription);
 
                 timeout = 15000;
+                Thread.Sleep(timeout);
                 }
-
-            Thread.Sleep(timeout);
             }
 
         private static void waitInCaseOfTesting(string testMutexFilePath)

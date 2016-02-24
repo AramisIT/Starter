@@ -161,11 +161,11 @@ namespace WebSolutionUpdater
             var destinationFileName = updateFileTaskDetails.FullPath;
             try
                 {
-                try
-                    {
-                    File.Move(sourceFileName, destinationFileName);
-                    }
-                catch
+                //try
+                //    {
+                //    File.Move(sourceFileName, destinationFileName);
+                //    }
+                //catch
                     {
                     File.Copy(sourceFileName, destinationFileName);
                     }
