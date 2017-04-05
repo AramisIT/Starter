@@ -35,13 +35,19 @@ namespace AramisStarter.Utils
 
         #region public
 
-        internal static string GetConnectionString(string serverName, string database = null)
+        internal static string GetConnectionString(string serverName, string database = null, int timeoutSec = 0)
             {
-            return string.Format(@"Data Source=""{0}"";{1} User ID=""{2}""; Password=""{3}""",
+            var result = string.Format(@"Data Source=""{0}"";{1} User ID=""{2}""; Password=""{3}""",
                 serverName,
                 database == null ? "" : string.Format(@" Initial Catalog=""{0}"";", database),
                 ARAMIS_GUEST_ID,
                 ARAMIS_GUEST_CRED);
+
+            if (timeoutSec > 0)
+                {
+                result += $" Connection Timeout={timeoutSec}";
+                }
+            return result;
             }
 
         internal static SqlConnection GetGuestConnection()
@@ -342,7 +348,7 @@ select 1 ok;
                 }
             }
 
-        private static string UpdateDatabaseName
+        public static string UpdateDatabaseName
             {
             get
                 {

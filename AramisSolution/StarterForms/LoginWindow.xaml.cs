@@ -322,7 +322,7 @@ namespace AramisStarter
             Hide();
             ShowSplash();
             authorized = true;
-            Starter.Init(App.SelectedSolution);
+            Starter.Init(App.SelectedSolution, SolutionUpdater.UpdateDatabaseExists);
             }
 
         private bool loginWithTicket(Guid guid)

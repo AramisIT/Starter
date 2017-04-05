@@ -73,9 +73,10 @@ namespace AramisStarter
 
         #region constructor
 
-        private Starter(SolutionInfo solutionInfo)
+        private Starter(SolutionInfo solutionInfo, bool updateDatabaseExists)
             {
             solution = solutionInfo;
+            this.updateDatabaseExists = updateDatabaseExists;
 
             solutionExecutiveFileName = App.SolutionDirPath + solution.SolutionName + ".exe";
 
@@ -294,16 +295,20 @@ namespace AramisStarter
             return executingTimeSec < EXECUTING_TIME_SEC;
             }
 
+        private bool updateDatabaseExists;
+
         private void SolutionExecutorMethod(object state)
             {
             while (!(SolutionUpdater.ReadyToRun && LoginWindow.Authorized))
                 {
                 Thread.Sleep(WAIT_FOR_RUN_INTERVAL_MILLISEC);
                 }
-
-            if (!WaitForPermissionToStart())
+            if (updateDatabaseExists)
                 {
-                return;
+                if (!WaitForPermissionToStart())
+                    {
+                    return;
+                    }
                 }
 
             ExecuteSolution();
@@ -420,11 +425,11 @@ namespace AramisStarter
         /// <summary>
         /// Выполняет единоразовую инициализацию, создает приватный экземпляр класса
         /// </summary>
-        internal static void Init(SolutionInfo solution)
+        internal static void Init(SolutionInfo solution, bool updateDatabaseExists)
             {
             if (!starterInitialized)
                 {
-                starter = new Starter(solution);
+                starter = new Starter(solution, updateDatabaseExists);
                 starterInitialized = true;
                 }
             }

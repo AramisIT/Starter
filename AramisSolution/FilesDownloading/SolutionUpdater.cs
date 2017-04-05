@@ -394,6 +394,9 @@ namespace AramisStarter.FilesDownloading
 
         private bool TryToDownLoadUpdate()
             {
+            updateDatabaseExists = checkIsUpdateDatabaseExists();
+            if (!updateDatabaseExists) return true;
+
             try
                 {
                 ReadUpdateNumber();
@@ -809,6 +812,35 @@ namespace AramisStarter.FilesDownloading
                 }
             }
 
+        private bool checkIsUpdateDatabaseExists()
+            {
+            var queryText = @"SELECT cast(count(*) as bit) hasUpdateDatabase FROM master.dbo.sysdatabases
+where [name]=@dbName";
+            SqlConnection conn = DatabaseHelper.GetGuestConnection();
+            try
+                {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(queryText, conn))
+                    {
+                    cmd.Parameters.AddWithValue("@dbName", DatabaseHelper.UpdateDatabaseName);
+                    object versionObj = cmd.ExecuteScalar();
+                    return true.Equals(versionObj);
+                    }
+                }
+            catch (Exception exp)
+                {
+                Trace.WriteLine(string.Format("GetAccessibleUpdateNumber error: {0}", exp.Message));
+                return false;
+                }
+            finally
+                {
+                if (conn != null)
+                    {
+                    ((IDisposable)conn).Dispose();
+                    }
+                }
+            }
+
         private static void SetRegistryKey()
             {
             registryKey = RegistryHelper.InitSubKey("TraceData");
@@ -845,6 +877,7 @@ namespace AramisStarter.FilesDownloading
         private int totalSec;
 
         private static string updateTemporaryFolderPathValue;
+        private static volatile bool updateDatabaseExists;
 
         private static string updateTemporaryFolderPath
             {
@@ -968,13 +1001,21 @@ namespace AramisStarter.FilesDownloading
                 return;
                 }
 
-            bool filesUpdated = TryToUpdateFiles();
-            if (filesUpdated)
+            bool filesUpdated;
+            if (updateDatabaseExists)
                 {
-                Starter.SetUpdateExistingStatus(false);
+                filesUpdated = TryToUpdateFiles();
+                if (filesUpdated)
+                    {
+                    Starter.SetUpdateExistingStatus(false);
+                    }
+                }
+            else
+                {
+                filesUpdated = true;
                 }
 
-            if (filesUpdated && !readyToRun && currentVersion > 0)
+            if (filesUpdated && !readyToRun && (currentVersion > 0 || accessibleUpdateNumber == 0))
                 {
                 downloadingComplateProgress = 1000;
                 Log.Append("readyToRun = true;");
@@ -1007,7 +1048,7 @@ namespace AramisStarter.FilesDownloading
                     Log.Append("SyncHelper.ExitMutex( TryToUpdateAramisSolution );");
                     }
 
-                if (timeToCheckForStarterUpdate)
+                if (timeToCheckForStarterUpdate && updateDatabaseExists)
                     {
                     Log.Append("if ( timeToCheckForStarterUpdate )");
 
@@ -1089,6 +1130,12 @@ namespace AramisStarter.FilesDownloading
                 return updater.readyToRun;
                 }
             }
+
+        public static bool UpdateDatabaseExists
+            {
+            get { return updateDatabaseExists; }
+            }
+
         internal static void MakeToUpdate(bool forsedUpdate)
             {
             Log.Append("readyToRun = false;");
