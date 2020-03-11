@@ -165,9 +165,6 @@
     <None Include="Resources\transparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="To do.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\logo.png" />
   </ItemGroup>
   <ItemGroup>
